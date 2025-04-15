@@ -11,25 +11,27 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import {formatDate} from "@/app/HelperFunctions.ts";
+import {formatDate} from "@/app/HelperFunctions";
+import type { User } from "@/app/types/User";
 
 const UserTable = () => {
-    const [currentUsers, setCurrentUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [currentUsers, setCurrentUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [errorState, setErrorState] = useState<boolean>(false);
 
     const fetchUsers = async () => {
         try {
             const response = await fetch('/api/users');
-            if (!response.ok) {
-                throw new Error('Failed to fetch users');
-            }
             const data = await response.json();
             setCurrentUsers(data.users);
             setLoading(false);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            setError(error.message);
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Error fetching users:', error.message);
+                setErrorState(true);
+            } else {
+                console.error('Unexpected error fetching users:', error);
+            }
             setLoading(false);
         }
     };
@@ -46,8 +48,8 @@ const UserTable = () => {
         );
     }
 
-    if (error) {
-        return <Box sx={{ color: 'error.main', p: 2 }}>{error}</Box>;
+    if (errorState) {
+        return <Box sx={{ color: 'error.main', p: 2 }}>Error, something went wrong.</Box>;
     }
 
     // Only proceed if currentUsers exists and is an array
@@ -84,13 +86,13 @@ const UserTable = () => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {currentUsers.map((user) => (
-                        <TableRow key={user.id}>
+                    {currentUsers[0].id && currentUsers.map((currentUser) => (
+                        <TableRow key={currentUser.id}>
                             {headerKeys.map((key) => (
-                                <TableCell key={`${user.id}-${key}`}>
+                                <TableCell key={`${currentUser.id}-${key}`}>
                                     {key === 'createdAt' || key === 'updatedAt'
-                                        ? formatDate(user[key])
-                                        : user[key] || 'N/A'}
+                                        ? formatDate((currentUser as Record<string, unknown>)[key]?.toString() || '')
+                                        : (currentUser as Record<string, unknown>)[key]?.toString() || 'N/A'}
                                 </TableCell>
                             ))}
                         </TableRow>
