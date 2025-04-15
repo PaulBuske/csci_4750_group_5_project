@@ -35,7 +35,7 @@ const UserTable = () => {
     };
 
     useEffect(() => {
-        fetchUsers();
+        fetchUsers().then();
     }, []);
 
     if (loading) {
