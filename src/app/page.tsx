@@ -9,7 +9,7 @@ export default function Home() {
               <iframe
                   width="100%"
                   height="100%"
-                  src="https://www.youtube.com/embed/zqLEO5tIuYs?autoplay=1&mute=1&loop=1&playlist=zqLEO5tIuYs"
+                  src="https://www.youtube.com/embed/zqLEO5tIuYs?autoplay=1&mute=1"
                   title="YouTube video background"
                   frameBorder="0"
                   allow="autoplay; encrypted-media"
@@ -81,7 +81,6 @@ export default function Home() {
                   allowFullScreen
               ></iframe>
           </Box>
-          https://www.youtube.com/watch?v=zqLEO5tIuYs&ab_channel=brmbrmcar
       </Box>
     );
 }
