@@ -3,5 +3,11 @@
   "deploy": {
     "include": [".next", "public"],
     "include_binary": ["**/*.woff2", "**/*.woff", "**/*.ttf", "**/*.eot"]
+  },
+  "tasks": {
+    "dev": "npx next dev --turbopack",
+    "build": "npx next build",
+    "start": "npx next start",
+    "lint": "npx next lint"
   }
 }
