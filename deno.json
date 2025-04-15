@@ -1,3 +1,7 @@
 {
-  "unstable": ["unsafe-proto"]
+  "unstable": ["unsafe-proto"],
+  "deploy": {
+    "include": [".next", "public"],
+    "include_binary": ["**/*.woff2", "**/*.woff", "**/*.ttf", "**/*.eot"]
+  }
 }
