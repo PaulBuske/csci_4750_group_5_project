@@ -1,44 +1,29 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('Starting seed operation...');
+    // Delete existing data
+    await prisma.sessions.deleteMany({});
+    await prisma.users.deleteMany({});
 
-    try {
-        // Check for existing users
-        const userCount = await prisma.users.count();
-        console.log(`Found ${userCount} existing users`);
+    // Create users with hashed passwords
+    await prisma.users.create({
+        data: {
+            name: 'Alice Smith',
+            email: 'alice@example.com',
+            password: await bcrypt.hash('Password1!', 10),
+        },
+    });
 
-        // Delete existing records
-        const deletedCount = await prisma.users.deleteMany({});
-        console.log(`Deleted ${deletedCount.count} existing users`);
-
-        // Create new users
-        const alice = await prisma.users.create({
-            data: {
-                name: 'Alice Smith',
-                email: 'alice@example.com',
-            },
-        });
-
-        const bob = await prisma.users.create({
-            data: {
-                name: 'Bob Johnson',
-                email: 'bob@example.com',
-            },
-        });
-
-        console.log('Created users:');
-        console.log({ alice, bob });
-
-        // Verify users were created
-        const finalCount = await prisma.users.count();
-        console.log(`Final user count: ${finalCount}`);
-    } catch (error) {
-        console.error('Error during seeding:', error);
-        throw error;
-    }
+    await prisma.users.create({
+        data: {
+            name: 'Bob Johnson',
+            email: 'bob@example.com',
+            password: await bcrypt.hash('Password2@', 10),
+        },
+    });
 }
 
 main()

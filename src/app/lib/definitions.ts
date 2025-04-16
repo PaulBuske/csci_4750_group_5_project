@@ -27,3 +27,11 @@ export type SignUpFormState =
     message?: string
 }
     | undefined
+
+export type LoginFormState = {
+    errors?: {
+        email?: string[];
+        password?: string[];
+    };
+    message?: string | null;
+} | undefined;

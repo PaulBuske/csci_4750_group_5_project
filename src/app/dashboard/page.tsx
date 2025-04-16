@@ -1,12 +1,11 @@
-import { verifySession } from '@/app/lib/dal'
+import { verifySession } from '@/app/lib/dal.ts'
 import {Box, List, ListItem, ListItemText, Stack, Typography} from "@mui/material";
-import UserTable from "@/app/components/UserTable";
+import UserTable from "@/app/ui/user-table.tsx";
 
-export default function Dashboard() {
+export default async function Dashboard() {
     const session = await verifySession()
     // const userRole = session?.user?.role // Assuming 'role' is part of the session object
 
-    if (!session) {
         return (
             <Box>
                 <Box position="relative" width="100%" height="50vh" overflow="hidden">
@@ -47,6 +46,16 @@ export default function Dashboard() {
                     <Typography variant="h2">
                         Spring 2025
                     </Typography>
+                    <Box>
+                        <Typography variant="h4">Dashboard</Typography>
+                        <Typography>Welcome to your dashboard!</Typography>
+
+                        {session && (
+                            <Typography>
+                                You are logged in with user ID: {session.userId}
+                            </Typography>
+                        )}
+                    </Box>
                     <Typography variant="h3">
                         Current tech stack:
                     </Typography>
@@ -88,5 +97,5 @@ export default function Dashboard() {
                 </Box>
             </Box>
         );
-    }
+
 }
