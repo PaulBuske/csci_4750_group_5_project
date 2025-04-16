@@ -7,22 +7,22 @@ async function main() {
 
     try {
         // Check for existing users
-        const userCount = await prisma.user.count();
+        const userCount = await prisma.users.count();
         console.log(`Found ${userCount} existing users`);
 
         // Delete existing records
-        const deletedCount = await prisma.user.deleteMany({});
+        const deletedCount = await prisma.users.deleteMany({});
         console.log(`Deleted ${deletedCount.count} existing users`);
 
         // Create new users
-        const alice = await prisma.user.create({
+        const alice = await prisma.users.create({
             data: {
                 name: 'Alice Smith',
                 email: 'alice@example.com',
             },
         });
 
-        const bob = await prisma.user.create({
+        const bob = await prisma.users.create({
             data: {
                 name: 'Bob Johnson',
                 email: 'bob@example.com',
@@ -33,7 +33,7 @@ async function main() {
         console.log({ alice, bob });
 
         // Verify users were created
-        const finalCount = await prisma.user.count();
+        const finalCount = await prisma.users.count();
         console.log(`Final user count: ${finalCount}`);
     } catch (error) {
         console.error('Error during seeding:', error);

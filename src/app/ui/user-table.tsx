@@ -11,8 +11,8 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import {formatDate} from "@/app/HelperFunctions";
-import type { User } from "@/app/types/User";
+import {formatDate} from "@/app/HelperFunctions.ts";
+import type { User } from "@/app/types/User.ts";
 
 const UserTable = () => {
     const [currentUsers, setCurrentUsers] = useState<User[]>([]);
