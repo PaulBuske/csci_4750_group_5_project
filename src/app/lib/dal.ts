@@ -1,9 +1,13 @@
 import 'server-only'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/app/lib/session'
+import { db } from '@/app/lib/db'
+import {cache} from "react";
+import {redirect} from "next/navigation";
 
 export const verifySession = cache(async () => {
-    const cookie = cookies().get('session')?.value
+    const providedCookies = await cookies()
+    const cookie = providedCookies.get('session')?.value
     const session = await decrypt(cookie)
 
     if (!session?.userId) {
@@ -18,19 +22,26 @@ export const getUser = cache(async () => {
     if (!session) return null
 
     try {
-        const data = await db.query.users.findMany({
-            where: eq(users.id, session.userId),
-            // Explicitly return the columns you need rather than the whole user object
-            columns: {
+        const foundUser = await db.users.findUnique({
+            where: { id: session.userId.toString() },
+            select: {
                 id: true,
                 name: true,
                 email: true,
             },
         })
-
-        return data
-    } catch (error: Unknown) {
-        console.log('Failed to fetch user' + error.toString())
+        if (!foundUser) {
+            alert('User not found')
+            redirect('/login')
+        }
+        if(!foundUser.id) {
+            const data = foundUser
+            return data
+        }
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            throw error.message
+        }
         return null
     }
 })

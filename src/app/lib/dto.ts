@@ -5,9 +5,10 @@ function canSeeUsername(viewer: User) {
     return true
 }
 
-function canSeeEmail(viewer: User, team: string) {
-    return viewer.isAdmin || team === viewer.team
-}
+// TODO: Implement user roles
+// function canSeeEmail(viewer: User, team: string) {
+//     return viewer.isAdmin || team === viewer.team
+// }
 
 export async function getProfileDTO(slug: string) {
     const data = await db.query.users.findMany({
@@ -20,7 +21,7 @@ export async function getProfileDTO(slug: string) {
 
     // Or return only what's specific to the query here
     return {
-        username: canSeeUsername(currentUser) ? user.username : null,
+        username: currentUser.username?
         email: canSeeEmail(currentUser, user.team)
             ? user.email
             : null,

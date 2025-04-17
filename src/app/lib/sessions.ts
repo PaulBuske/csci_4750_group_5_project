@@ -3,7 +3,6 @@ import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { db } from '@/app/lib/db';
-import { sessions } from '@/app/lib/schema'; // Add this import if you have a schema file
 
 const secretKey = new TextEncoder().encode(
     process.env.JWT_SECRET || 'fallback_secret_key_at_least_32_chars_long!'

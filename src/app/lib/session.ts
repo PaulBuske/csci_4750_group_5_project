@@ -6,7 +6,7 @@ const secretKey = new TextEncoder().encode(
     process.env.JWT_SECRET || 'fallback_secret_key_at_least_32_chars_long!'
 );
 
-export async function encrypt(payload: any) {
+export async function encrypt(payload: unknown) {
     return await new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()

@@ -69,7 +69,7 @@ export async function middleware(req: NextRequest) {
 // Only run middleware on specified routes
 export const config = {
     matcher: [
-        '/dashboard/:path*',
+        '/dashboard',
         '/public/login',
         '/signup'
     ],
