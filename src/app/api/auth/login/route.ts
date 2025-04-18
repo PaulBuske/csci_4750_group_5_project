@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { cookies } from 'next/headers';
 import { encrypt } from '@/app/lib/session';
-import { dbSingleton } from '@/app/lib/dbSingleton.ts';
+import { dbSingleton } from '@/app/lib/dbSingleton';
 
 export async function POST(request: Request) {
     try {
@@ -58,8 +58,8 @@ export async function POST(request: Request) {
         });
 
         // Set the session cookie
-        const cookieStore = cookies();
-        await cookieStore.set('session', encryptedSession, {
+        const cookieStore = await cookies();
+        cookieStore.set('session', encryptedSession, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             expires: expiresAt,
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             success: true,
             user: {
-                id: user.id,
+                id: user.userId,
                 email: user.email,
                 name: user.name,
             },

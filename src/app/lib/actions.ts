@@ -1,4 +1,5 @@
-'use server'
+/*
+use'use server'
 import { verifySession } from '@/app/lib/dal'
 
 export async function serverAction(formData: FormData) {
@@ -10,4 +11,4 @@ export async function serverAction(formData: FormData) {
         return null
     }
     // Proceed with the action for authorized users
-}
+}*/

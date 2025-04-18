@@ -1,6 +1,6 @@
-import { verifySession } from '@/app/lib/dal.ts'
+import { verifySession } from '@/app/lib/dal'
 import {Box, List, ListItem, ListItemText, Stack, Typography} from "@mui/material";
-import UserTable from "@/app/ui/user-table.tsx";
+import UserTable from "@/app/ui/user-table";
 
 export default async function Dashboard() {
     const session = await verifySession()

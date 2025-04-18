@@ -1,9 +1,11 @@
 import 'server-only'
 import { getUser } from '@/app/lib/dal'
 
+/*
 function canSeeUsername(viewer: User) {
     return true
 }
+*/
 
 // TODO: Implement user roles
 // function canSeeEmail(viewer: User, team: string) {

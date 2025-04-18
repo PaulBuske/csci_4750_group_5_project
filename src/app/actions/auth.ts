@@ -1,4 +1,6 @@
 import { SignupFormSchema, SignUpFormState } from '@/app/lib/definitions'
+import bycrpt from 'bcrypt'
+import {dbSingleton} from "@/app/lib/dbSingleton";
 
 export async function signup(state: SignUpFormState, formData: FormData) {
     // 1. Validate form fields
@@ -18,25 +20,24 @@ export async function signup(state: SignUpFormState, formData: FormData) {
     // 2. Prepare data for insertion into database
     const {name, email, password} = validatedFields.data
     // e.g. Hash the user's password before storing it
-    const hashedPassword = await bcrypt.hash(password, 10)
-
+    const hashedPassword = await bycrpt.hash(password, 10)
     // 3. Insert the user into the database or call an Auth Library's API
-    const data = await db
-        .insert(users)
-        .values({
-            name,
-            email,
-            password: hashedPassword,
+        const user = await dbSingleton.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+            },
+            select: {
+                userId: true,
+            },
         })
-        .returning({id: users.id})
 
-    const user = data[0]
-
-    if (!user) {
-        return {
-            message: 'An error occurred while creating your account.',
+        if (!user) {
+            return {
+                message: 'An error occurred while creating your account.',
+            }
         }
-    }
 }
 // TODO:
 // 4. Create user session
