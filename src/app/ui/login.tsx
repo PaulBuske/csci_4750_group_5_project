@@ -14,7 +14,6 @@ import {
     CircularProgress
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Link from 'next/link';
 
 export default function LoginForm() {
     const router = useRouter();
@@ -41,7 +40,8 @@ export default function LoginForm() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Failed to login');
+               setError(data.message || 'Failed to login');
+               return
             }
 
             // Redirect to dashboard on successful login
@@ -110,11 +110,6 @@ export default function LoginForm() {
                     >
                         {loading ? <CircularProgress size={24} /> : 'Log In'}
                     </Button>
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                        <Link href="/signup">
-                            {"Don't have an account? Sign Up"}
-                        </Link>
-                    </Box>
                 </Box>
             </Paper>
         </Container>

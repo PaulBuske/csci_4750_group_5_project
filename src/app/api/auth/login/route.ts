@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { cookies } from 'next/headers';
 import { encrypt } from '@/app/lib/session';
-import { db } from '@/app/lib/db';
+import { dbSingleton } from '@/app/lib/dbSingleton.ts';
 
 export async function POST(request: Request) {
     try {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         }
 
         // Find user by email
-        const user = await db.users.findUnique({
+        const user = await dbSingleton.user.findUnique({
             where: { email },
         });
 
@@ -43,22 +43,23 @@ export async function POST(request: Request) {
         const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
         // Create a session in the database
-        const session = await db.sessions.create({
+        const session = await dbSingleton.session.create({
             data: {
-                userId: user.id,
+                userId: user.userId,
                 expiresAt,
             }
         });
 
         // Encrypt the session data
         const encryptedSession = await encrypt({
-            sessionId: session.id,
-            userId: user.id,
+            sessionId: session.sessionId,
+            userId: user.userId,
             expiresAt: expiresAt.toISOString()
         });
 
         // Set the session cookie
-        cookies().set('session', encryptedSession, {
+        const cookieStore = cookies();
+        await cookieStore.set('session', encryptedSession, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             expires: expiresAt,

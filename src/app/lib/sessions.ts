@@ -2,7 +2,7 @@
 import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { db } from '@/app/lib/db';
+import { dbSingleton } from '@/app/lib/dbSingleton.ts';
 
 const secretKey = new TextEncoder().encode(
     process.env.JWT_SECRET || 'fallback_secret_key_at_least_32_chars_long!'
@@ -23,7 +23,7 @@ export async function decrypt(token: string | undefined) {
         const { payload } = await jwtVerify(token, secretKey);
         return payload;
     } catch (error) {
-        // Just return null on error, don't throw
+        logger.error('Failed to verify JWT:', error);
         return null;
     }
 }
@@ -33,7 +33,7 @@ export async function createSession(userId: string) {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     // 1. Create a session in the database
-    const session = await db.sessions.create({
+    const session = await dbSingleton.sessions.create({
         data: {
             userId: userId,
             expiresAt,

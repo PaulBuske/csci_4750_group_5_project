@@ -71,6 +71,5 @@ export const config = {
     matcher: [
         '/dashboard',
         '/public/login',
-        '/signup'
     ],
 };

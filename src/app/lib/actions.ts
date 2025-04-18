@@ -9,6 +9,5 @@ export async function serverAction(formData: FormData) {
     if (userRole !== 'admin') {
         return null
     }
-
     // Proceed with the action for authorized users
 }

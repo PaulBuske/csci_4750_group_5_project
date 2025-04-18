@@ -21,6 +21,7 @@ export async function decrypt(token: string | undefined) {
         const { payload } = await jwtVerify(token, secretKey);
         return payload;
     } catch (error) {
+        logger.error('Failed to verify JWT:', error);
         return null;
     }
 }

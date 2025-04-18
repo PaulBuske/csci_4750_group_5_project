@@ -30,7 +30,7 @@ export default function Home() {
                 >
                     Login
                 </Button>
-                <Button
+{/*                <Button
                     variant="outlined"
                     color="primary"
                     component={Link}
@@ -38,7 +38,7 @@ export default function Home() {
                     sx={{ mx: 1 }}
                 >
                     Sign Up
-                </Button>
+                </Button>*/}
             </Box>
         </Box>
     );
