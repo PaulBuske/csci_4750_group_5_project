@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { verifySession } from '@/app/lib/dal';
+import {NextResponse} from 'next/server';
+import {PrismaClient} from '@prisma/client';
+import {verifySession} from '../../lib/dal.ts';
 
 const prisma = new PrismaClient();
 
@@ -29,10 +29,7 @@ export async function GET() {
         } else {
             console.error('Unexpected error fetching users:', error);
         }
-        return NextResponse.json(
-            { error: 'Failed to fetch users' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to fetch users', status: 500 });
     } finally {
         await prisma.$disconnect();
     }

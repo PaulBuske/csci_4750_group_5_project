@@ -1,6 +1,6 @@
 import { PrismaClient, UserRole, PayStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { addDays, subDays, startOfDay, addHours, subWeeks } from 'date-fns';
+import { addDays, subDays, startOfDay, addHours } from 'date-fns';
 
 const prisma = new PrismaClient();
 

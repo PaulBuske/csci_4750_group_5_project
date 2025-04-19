@@ -2,7 +2,16 @@
   "unstable": ["unsafe-proto"],
   "deploy": {
     "include": [".next", "public"],
-    "include_binary": ["**/*.woff2", "**/*.woff", "**/*.ttf", "**/*.eot"]
+    "include_binary": ["**/*.woff2", "**/*.woff", "**/*.ttf", "**/*.eot"],
+    "allowJs": true,
+    "allowTypescript": true,
+    "jsx": "react-jsx",
+    "tsx": "react-tsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "strict": true
+  },
+  "imports": {
+    "@/": "./src/"
   },
   "tasks": {
     "dev": "npx next dev --turbopack",

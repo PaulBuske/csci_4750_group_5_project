@@ -13,10 +13,6 @@ Run the development server:
 deno task dev
 ```
 
-Start PostgreSQL in Docker:
-```bash
-docker compose up -d
-```
 
 Run the Prisma migration:
 ```bash
@@ -40,3 +36,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
   - TypeScript
   - Prisma
   - PostgreSQL
+  - Neon

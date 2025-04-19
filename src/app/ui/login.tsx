@@ -2,17 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-    Box,
-    TextField,
-    Button,
-    Typography,
-    Container,
-    Paper,
-    Avatar,
-    Alert,
-    CircularProgress
-} from '@mui/material';
+import { Alert, Avatar, Box, Button, CircularProgress, Container, Paper, TextField, Typography } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 export default function LoginForm() {
@@ -40,11 +30,10 @@ export default function LoginForm() {
             const data = await response.json();
 
             if (!response.ok) {
-               setError(data.message || 'Failed to login');
-               return
+                setError(data.message || 'Failed to login');
+                return;
             }
 
-            // Redirect to dashboard on successful login
             router.push('/dashboard');
             router.refresh();
         } catch (error) {
@@ -54,7 +43,6 @@ export default function LoginForm() {
             setLoading(false);
         }
     }
-
     return (
         <Container component="main" maxWidth="xs">
             <Paper
@@ -80,7 +68,12 @@ export default function LoginForm() {
                     </Alert>
                 )}
 
-                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    noValidate
+                    sx={{ mt: 1, width: '100%' }}
+                >
                     <TextField
                         margin="normal"
                         required

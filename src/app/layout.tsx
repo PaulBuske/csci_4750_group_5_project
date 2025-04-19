@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type {Metadata} from "next";
 import "./globals.css";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "CSCI 4750 Group 5 Spring 2025 Project",
