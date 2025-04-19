@@ -1,5 +1,6 @@
 import {Box, Button, Typography} from '@mui/material';
 import React from "react";
+import React from "react";
 import NextLink from 'next/link';
 
 export default function Home() {
