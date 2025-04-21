@@ -1,100 +1,143 @@
-import {verifySession} from "@/app/lib/dal.ts"
-import {Box, List, ListItem, ListItemText, Stack, Typography} from "@mui/material";
+"use client";
+
+import { getUser, verifySession } from "@/app/lib/dal.ts";
+import {
+    Alert,
+    Box,
+    CircularProgress,
+    Stack,
+    Typography,
+} from "@mui/material";
 import UserTable from "@/app/ui/user-table.tsx";
-import React from "react";
+import React, { useEffect } from "react";
+import type { ProjectUser, ValidSession } from "@/app/types/project-types.ts";
+import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
 
-export default async function Dashboard() {
-    const currentValidSession = await verifySession()
-    // const userRole = session?.user?.role // Assuming 'role' is part of the session object
+export default function Dashboard() {
+    const [currentValidSession, setCurrentValidSession] = React.useState<
+        ValidSession | null
+    >(null);
+    const [error, setError] = React.useState<Error | null>(null);
+    const [currentUser, setCurrentUser] = React.useState<ProjectUser | null>(
+        null,
+    );
+    const [loading, setLoading] = React.useState(true);
 
-        return (
-            <Box>
-                <Box position="relative" width="100%" height="50vh" overflow="hidden">
-                    {/* YouTube Video Background */}
-                    <iframe
-                        width="100%"
-                        height="100%"
-                        src="https://www.youtube.com/embed/zqLEO5tIuYs?autoplay=1&mute=1"
-                        title="YouTube video background"
-                        allow="autoplay; encrypted-media"
-                        style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            zIndex: -1,
-                            pointerEvents: "none",
-                        }}
-                    ></iframe>
+    useEffect(() => {
+        verifySession().then((session) => {
+            try {
+                const currentSession = {
+                    ...session,
+                    userId: session.userId.toString(),
+                };
+                if (!currentSession.isAuth || !currentSession.userId) {
+                    const sessionError = new Error(
+                        "Session not found or invalid",
+                    );
+                    setError(sessionError);
+                    console.error("Session not found or invalid");
+                    return;
+                }
+                setCurrentValidSession(currentSession);
+            } catch (e) {
+                if (e instanceof Error && e.message != null) {
+                    setError(e);
+                    console.error("Failed to fetch session:", e.message);
+                    return;
+                } else {
+                    console.error("Unexpected error fetching session:", error);
+                    setError(new Error("Unexpected error fetching session"));
+                }
+            }
+        })
+            .catch((error) => {
+                setError(error);
+                console.error("Failed to fetch session:", error);
+            });
+        getUser().then((foundUser: ProjectUser | null | undefined) => {
+            if (!foundUser) {
+                const userError = new Error("User not found");
+                setError(userError);
+                console.error("User not found");
+                return;
+            }
+            setCurrentUser(foundUser);
+            setLoading(false);
+        }).catch((error) => {
+            setError(error);
+            console.error("Failed to fetch user:", error);
+        });
+    }, [currentUser?.userId, error]); // Empty dependency array to run only once on mount
 
-                    {/* Title Text */}
-                    <Box
-                        position="absolute"
-                        top="40%"
-                        left="25%"
-                        textAlign="center"
-                        color="white"
-                    >
-                        <Typography variant="h1" component="h1" align='center'>
-                            CSCI 4750 Group 5 Project Title: TBD
-                        </Typography>
-                        <Typography variant="h2">Spring 2025</Typography>
-                    </Box>
+    function checkForAdminOrManagerRoles() {
+        return currentUser?.role?.toString() === "ADMIN" || currentUser?.role?.toString() === "MANAGER";
+    }
+
+    return (
+        <Box
+            width="100%"
+            height="min-content"
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+        >
+            {error && (
+                <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
+                    {error.message}
+                </Alert>
+            )}
+
+            {loading ? <CircularProgress size={36} /> : (
+                <Box>
+                    <Stack spacing={2}>
+                        <Box>
+                            <LandingPageAppBar
+                                props={{ currentUser: currentUser }}
+                            />
+                            {currentValidSession && (
+                                <Stack>
+                                    <Typography variant="h4" sx={{ mt: 2 }}>
+                                        Welcome back,
+                                        {currentUser?.name
+                                            ? ` ${currentUser.name}`
+                                            : "Error loading name."}
+                                    </Typography>
+                                    <Typography variant="h5" sx={{ mt: 2 }}>
+                                        Your email is:
+                                        {currentUser?.email
+                                            ? ` ${currentUser.email}`
+                                            : "Error loading email."}
+                                    </Typography>
+                                    <Typography>
+                                        Your current role is:
+                                        {currentUser?.role
+                                            ? ` ${currentUser.role}`
+                                            : "Error loading role."}
+                                    </Typography>
+                                    <Typography>
+                                        Your current hourly rate is:
+                                        {currentUser?.hourlyRate
+                                            ? ` $${
+                                                currentUser.hourlyRate.toFixed(
+                                                    2,
+                                                )
+                                            }`
+                                            : "Error loading payrate."}
+                                    </Typography>
+                                </Stack>
+                            )}
+                        </Box>
+                    </Stack>
+
+                    {checkForAdminOrManagerRoles() && (
+                        <Stack maxWidth="80vw" margin="auto" marginTop={4}>
+                            <Typography variant="h3">Current Users:</Typography>
+                            <UserTable/>
+                        </Stack>
+                    )}
                 </Box>
-                <Stack spacing={2}>
-                    <Typography variant="h2">
-                        Spring 2025
-                    </Typography>
-                    <Box>
-                        <Typography variant="h4">Dashboard</Typography>
-                        <Typography>Welcome to your dashboard!</Typography>
-
-                        {currentValidSession && (
-                            <Typography>
-                                You are logged in with user ID: {currentValidSession.userId.toString()}
-                            </Typography>
-                        )}
-                    </Box>
-                    <Typography variant="h3">
-                        Current tech stack:
-                    </Typography>
-                    <List sx={{listStyleType: 'disc', paddingLeft: 4, marginTop: 2}}>
-                        <ListItem sx={{display: 'list-item'}}>
-                            <ListItemText primary="Deno"/>
-                        </ListItem>
-                        <ListItem sx={{display: 'list-item'}}>
-                            <ListItemText primary="Next.js"/>
-                        </ListItem>
-                        <ListItem sx={{display: 'list-item'}}>
-                            <ListItemText primary="React"/>
-                        </ListItem>
-                        <ListItem sx={{display: 'list-item'}}>
-                            <ListItemText primary="TypeScript"/>
-                        </ListItem>
-                        <ListItem sx={{display: 'list-item'}}>
-                            <ListItemText primary="Material UI"/>
-                        </ListItem>
-                        <ListItem sx={{display: 'list-item'}}>
-                            <ListItemText primary="PostgreSQL"/>
-                        </ListItem>
-                    </List>
-                </Stack>
-                <Stack maxWidth='80vw' margin='auto' marginTop={4}>
-                    <Typography variant='h3'>Current Users:</Typography>
-                    <UserTable/>
-                </Stack>
-                <Box marginTop={4} display="flex" justifyContent="center">
-                    <iframe
-                        width="1920"
-                        height="1080"
-                        src="https://www.youtube.com/embed/0aBkyfz9anQ?autoplay=1&mute=1"
-                        title="He-Man!"
-                        allow="autoplay; encrypted-media"
-                        allowFullScreen
-                    ></iframe>
-                </Box>
-            </Box>
-        );
-
+            )}
+        </Box>
+    );
 }

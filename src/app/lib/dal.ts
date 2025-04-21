@@ -1,3 +1,5 @@
+'use server'
+
 import {cookies} from 'next/headers'
 import {decrypt} from "@/app/lib/sessions.ts"
 import {dbSingleton} from "@/app/lib/dbSingleton.ts"
@@ -13,7 +15,7 @@ export const verifySession = cache(async () => {
         redirect('/login')
     }
 
-    return {isAuth: true, userId: session.userId}
+    return { isAuth: true, userId: session.userId }
 })
 
 export const getUser = cache(async () => {
@@ -27,14 +29,19 @@ export const getUser = cache(async () => {
                 userId: true,
                 name: true,
                 email: true,
+                hourlyRate: true,
+                role: true,
             },
         })
         if (!foundUser) {
             alert('User not found')
             redirect('/login')
         }
-        if(!foundUser.userId) {
-            return foundUser
+        if(foundUser.userId) {
+            const projectUser ={
+                ...foundUser, hourlyRate: foundUser.hourlyRate.toNumber()
+            }
+            return projectUser
         }
     } catch (error: unknown) {
         if (error instanceof Error) {

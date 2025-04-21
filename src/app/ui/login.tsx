@@ -44,7 +44,7 @@ export default function LoginForm() {
         }
     }
     return (
-        <Container component="main" maxWidth="xs">
+        <Container component="main" maxWidth="xl">
             <Paper
                 elevation={3}
                 sx={{

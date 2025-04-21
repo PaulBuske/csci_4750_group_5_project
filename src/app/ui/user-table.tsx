@@ -12,8 +12,8 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import {formatDate} from '../helper-functions.ts';
-import type {User} from "../types/user.ts";
+import {formatDate} from "@/app/helper-functions.ts";
+import type {ProjectUser} from "../types/project-types.ts";
 
 // Fields to exclude from the table display
 const EXCLUDED_FIELDS = ['password', 'resetToken'];
@@ -30,7 +30,7 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 const UserTable = () => {
-    const [currentUsers, setCurrentUsers] = useState<User[]>([]);
+    const [currentUsers, setCurrentUsers] = useState<ProjectUser[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [errorState, setErrorState] = useState<boolean>(false);
     const [isClient, setIsClient] = useState(false);
@@ -139,7 +139,7 @@ const UserTable = () => {
 };
 
 // Helper function to render cell content appropriately based on field type
-function renderCellContent(user: User, key: string): React.ReactNode {
+function renderCellContent(user: ProjectUser, key: string): React.ReactNode {
     const value = (user as Record<string, unknown>)[key];
 
     if (value === null || value === undefined) {
