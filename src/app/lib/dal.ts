@@ -1,7 +1,6 @@
-import 'server-only'
-import { cookies } from 'next/headers'
-import { decrypt } from '@/app/lib/session'
-import { dbSingleton } from '@/app/lib/dbSingleton.ts'
+import {cookies} from 'next/headers'
+import {decrypt} from "@/app/lib/sessions.ts"
+import {dbSingleton} from "@/app/lib/dbSingleton.ts"
 import {cache} from "react";
 import {redirect} from "next/navigation";
 
@@ -14,7 +13,7 @@ export const verifySession = cache(async () => {
         redirect('/login')
     }
 
-    return { isAuth: true, userId: session.userId }
+    return {isAuth: true, userId: session.userId}
 })
 
 export const getUser = cache(async () => {
@@ -22,10 +21,10 @@ export const getUser = cache(async () => {
     if (!session) return null
 
     try {
-        const foundUser = await dbSingleton.users.findUnique({
-            where: { id: session.userId.toString() },
+        const foundUser = await dbSingleton.user.findUnique({
+            where: { userId: session.userId.toString() },
             select: {
-                id: true,
+                userId: true,
                 name: true,
                 email: true,
             },
@@ -34,13 +33,12 @@ export const getUser = cache(async () => {
             alert('User not found')
             redirect('/login')
         }
-        if(!foundUser.id) {
-            const data = foundUser
-            return data
+        if(!foundUser.userId) {
+            return foundUser
         }
     } catch (error: unknown) {
         if (error instanceof Error) {
-            logger.error('Failed to fetch user:', error.message)
+            console.error('Failed to fetch user:', error.message)
         }
         return null
     }

@@ -1,8 +1,7 @@
-// src/app/lib/db.ts
-import { PrismaClient } from '@prisma/client';
+import {PrismaClient} from '@prisma/client';
 
 // Create a singleton instance of PrismaClient
-const globalForPrisma = global as unknown as {
+const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
 };
 

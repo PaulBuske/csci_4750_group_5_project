@@ -1,8 +1,8 @@
-import { SignupFormSchema, SignUpFormState } from '@/app/lib/definitions'
+import {SignupFormSchema} from "@/app/lib/definitions.ts"
 import bycrpt from 'bcrypt'
-import {dbSingleton} from "@/app/lib/dbSingleton";
+import {dbSingleton} from "@/app/lib/dbSingleton.ts";
 
-export async function signup(state: SignUpFormState, formData: FormData) {
+export async function signup(formData: FormData) {
     // 1. Validate form fields
     const validatedFields = SignupFormSchema.safeParse({
         name: formData.get('name'),

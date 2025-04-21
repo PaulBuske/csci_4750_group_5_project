@@ -1,8 +1,9 @@
-// src/app/page.tsx
-import { Box, Button, Typography } from '@mui/material';
-import Link from 'next/link';
+import {Box, Button, Typography} from '@mui/material';
+import React from "react";
+import NextLink from 'next/link';
 
 export default function Home() {
+
     return (
         <Box
             sx={{
@@ -24,7 +25,7 @@ export default function Home() {
                 <Button
                     variant="contained"
                     color="primary"
-                    component={Link}
+                    component={NextLink}
                     href="/public/login"
                     sx={{ mx: 1 }}
                 >

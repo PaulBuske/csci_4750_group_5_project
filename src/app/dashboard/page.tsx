@@ -1,9 +1,10 @@
-import { verifySession } from '@/app/lib/dal'
+import {verifySession} from "@/app/lib/dal.ts"
 import {Box, List, ListItem, ListItemText, Stack, Typography} from "@mui/material";
-import UserTable from "@/app/ui/user-table";
+import UserTable from "@/app/ui/user-table.tsx";
+import React from "react";
 
 export default async function Dashboard() {
-    const session = await verifySession()
+    const currentValidSession = await verifySession()
     // const userRole = session?.user?.role // Assuming 'role' is part of the session object
 
         return (
@@ -15,7 +16,6 @@ export default async function Dashboard() {
                         height="100%"
                         src="https://www.youtube.com/embed/zqLEO5tIuYs?autoplay=1&mute=1"
                         title="YouTube video background"
-                        frameBorder="0"
                         allow="autoplay; encrypted-media"
                         style={{
                             position: "absolute",
@@ -50,9 +50,9 @@ export default async function Dashboard() {
                         <Typography variant="h4">Dashboard</Typography>
                         <Typography>Welcome to your dashboard!</Typography>
 
-                        {session && (
+                        {currentValidSession && (
                             <Typography>
-                                You are logged in with user ID: {session.userId}
+                                You are logged in with user ID: {currentValidSession.userId.toString()}
                             </Typography>
                         )}
                     </Box>
@@ -90,7 +90,6 @@ export default async function Dashboard() {
                         height="1080"
                         src="https://www.youtube.com/embed/0aBkyfz9anQ?autoplay=1&mute=1"
                         title="He-Man!"
-                        frameBorder="0"
                         allow="autoplay; encrypted-media"
                         allowFullScreen
                     ></iframe>

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import {useEffect, useState} from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -12,8 +12,8 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import { formatDate } from "@/app/HelperFunctions.ts";
-import type { User } from "@/app/types/User.ts";
+import {formatDate} from '../helper-functions.ts';
+import type {User} from "../types/user.ts";
 
 // Fields to exclude from the table display
 const EXCLUDED_FIELDS = ['password', 'resetToken'];
@@ -42,7 +42,7 @@ const UserTable = () => {
             try {
                 const response = await fetch('/api/users');
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch users: ${response.status}`);
+                    console.error(`Failed to fetch users: ${response.status}`);
                 }
                 const data = await response.json();
                 setCurrentUsers(data.users);
@@ -58,7 +58,7 @@ const UserTable = () => {
             }
         };
 
-        fetchUsers();
+        fetchUsers().then();
     }, []);
 
     // Only render content when on client-side to prevent hydration mismatch

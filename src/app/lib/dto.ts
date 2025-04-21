@@ -1,11 +1,12 @@
-import 'server-only'
-import { getUser } from '@/app/lib/dal'
-
 /*
+import {getUser} from '../lib/dal.ts'
+import { dbSingleton} from "../lib/dbSingleton.ts";
+
+/!*
 function canSeeUsername(viewer: User) {
     return true
 }
-*/
+*!/
 
 // TODO: Implement user roles
 // function canSeeEmail(viewer: User, team: string) {
@@ -28,4 +29,4 @@ export async function getProfileDTO(slug: string) {
             ? user.email
             : null,
     }
-}
+}*/

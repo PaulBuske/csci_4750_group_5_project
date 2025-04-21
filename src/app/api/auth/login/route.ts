@@ -1,9 +1,8 @@
-// src/app/api/auth/login/route.ts
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
-import { cookies } from 'next/headers';
-import { encrypt } from '@/app/lib/session';
-import { dbSingleton } from '@/app/lib/dbSingleton';
+import { NextResponse } from "next/server";
+import bcrypt from "bcrypt";
+import { cookies } from "next/headers";
+import { encrypt } from "@/app/lib/sessions.ts";
+import { dbSingleton } from "@/app/lib/dbSingleton.ts";
 
 export async function POST(request: Request) {
     try {
@@ -12,8 +11,7 @@ export async function POST(request: Request) {
         // Validate input
         if (!email || !password) {
             return NextResponse.json(
-                { message: 'Email and password are required' },
-                { status: 400 }
+                { message: "Email and password are required", status: 400 },
             );
         }
 
@@ -24,8 +22,7 @@ export async function POST(request: Request) {
 
         if (!user) {
             return NextResponse.json(
-                { message: 'Invalid email or password' },
-                { status: 401 }
+                { message: "Invalid email or password", status: 401 },
             );
         }
 
@@ -34,8 +31,7 @@ export async function POST(request: Request) {
 
         if (!passwordMatch) {
             return NextResponse.json(
-                { message: 'Invalid email or password' },
-                { status: 401 }
+                { message: "Invalid email or password", status: 401 },
             );
         }
 
@@ -46,27 +42,27 @@ export async function POST(request: Request) {
         const session = await dbSingleton.session.create({
             data: {
                 userId: user.userId,
-                expiresAt,
-            }
+                expiresAt: expiresAt,
+            },
         });
 
         // Encrypt the session data
         const encryptedSession = await encrypt({
             sessionId: session.sessionId,
             userId: user.userId,
-            expiresAt: expiresAt.toISOString()
+            expiresAt: expiresAt.toISOString(),
         });
 
         // Set the session cookie
         const cookieStore = await cookies();
-        cookieStore.set('session', encryptedSession, {
+        cookieStore.set("session", encryptedSession, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             expires: expiresAt,
-            sameSite: 'lax',
-            path: '/',
+            sameSite: "lax",
+            path: "/",
         });
-
+        console.log("Session cookie set:", encryptedSession);
         return NextResponse.json({
             success: true,
             user: {
@@ -76,10 +72,9 @@ export async function POST(request: Request) {
             },
         });
     } catch (error) {
-        console.error('Login error:', error);
+        console.error("Login error:", error);
         return NextResponse.json(
-            { message: 'Internal server error' },
-            { status: 500 }
+            { message: "Internal server error", status: 500 },
         );
     }
 }
