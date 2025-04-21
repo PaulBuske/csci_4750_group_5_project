@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
-import { encrypt } from "../../../lib/sessions.ts";
-import { dbSingleton } from "../../../lib/dbSingleton.ts";
+import { encrypt } from "@/app/lib/sessions.ts";
+import { dbSingleton } from "@/app/lib/dbSingleton.ts";
 
 export async function POST(request: Request) {
     try {

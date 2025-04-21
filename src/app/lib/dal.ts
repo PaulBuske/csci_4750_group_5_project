@@ -1,6 +1,6 @@
 import {cookies} from 'next/headers'
-import {decrypt} from '../lib/sessions.ts'
-import {dbSingleton} from '../lib/dbSingleton.ts'
+import {decrypt} from "@/app/lib/sessions.ts"
+import {dbSingleton} from "@/app/lib/dbSingleton.ts"
 import {cache} from "react";
 import {redirect} from "next/navigation";
 

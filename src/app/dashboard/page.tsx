@@ -1,6 +1,6 @@
-import {verifySession} from '../lib/dal.ts'
+import {verifySession} from "@/app/lib/dal.ts"
 import {Box, List, ListItem, ListItemText, Stack, Typography} from "@mui/material";
-import UserTable from "../ui/user-table.tsx";
+import UserTable from "@/app/ui/user-table.tsx";
 import React from "react";
 
 export default async function Dashboard() {

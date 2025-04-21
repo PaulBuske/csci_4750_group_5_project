@@ -13,6 +13,9 @@ const nextConfig: import('next').NextConfig = {
         };
         return config;
     },
+    turbopack: {
+        resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+    },
 };
 
 export default nextConfig;
