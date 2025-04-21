@@ -62,7 +62,7 @@ export async function POST(request: Request) {
             sameSite: "lax",
             path: "/",
         });
-
+        console.log("Session cookie set:", encryptedSession);
         return NextResponse.json({
             success: true,
             user: {
