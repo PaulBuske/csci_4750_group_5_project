@@ -12,6 +12,7 @@ import UserTable from "@/app/ui/user-table.tsx";
 import React, { useEffect } from "react";
 import type { ProjectUser, ValidSession } from "@/app/types/project-types.ts";
 import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
+import TimePunchModal from "@/app/ui/time-punch-modal.tsx";
 
 export default function Dashboard() {
     const [currentValidSession, setCurrentValidSession] = React.useState<
@@ -67,7 +68,7 @@ export default function Dashboard() {
             setError(error);
             console.error("Failed to fetch user:", error);
         });
-    }, [currentUser?.userId, error]); // Empty dependency array to run only once on mount
+    }, [currentUser?.userId, error]);
 
     function checkForAdminOrManagerRoles() {
         return currentUser?.role?.toString() === "ADMIN" || currentUser?.role?.toString() === "MANAGER";
@@ -123,8 +124,9 @@ export default function Dashboard() {
                                                     2,
                                                 )
                                             }`
-                                            : "Error loading payrate."}
+                                            : "Error loading pay rate."}
                                     </Typography>
+                                    <TimePunchModal currentUser={currentUser}/>
                                 </Stack>
                             )}
                         </Box>

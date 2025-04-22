@@ -5,6 +5,7 @@ import {decrypt} from "@/app/lib/sessions.ts"
 import {dbSingleton} from "@/app/lib/dbSingleton.ts"
 import {cache} from "react";
 import {redirect} from "next/navigation";
+import {checkPayPeriodRange} from "@/app/api/time-punch/checkPayPeriodRange.ts";
 
 export const verifySession = cache(async () => {
     const providedCookies = await cookies()
@@ -50,3 +51,34 @@ export const getUser = cache(async () => {
         return null
     }
 })
+
+export const createOrGetPayPeriodIfNotExists = async (userId: string, currentDate: Date) => {
+
+    const existingPayPeriod = await dbSingleton.payPeriod.findFirst({
+        where: {
+            userId,
+            startDate: { lte: currentDate },
+            endDate: { gte: currentDate },
+        },
+    });
+
+    const foundPayPeriodId = existingPayPeriod?.payPeriodId;
+
+    if (!foundPayPeriodId) {
+        const {startDate, endDate} = checkPayPeriodRange(currentDate);
+        const newPayPeriod = await dbSingleton.payPeriod.create({
+            data: {
+                userId,
+                startDate,
+                endDate,
+                totalHours: 0,
+                grossPay: 0,
+                status: 'PENDING',
+            },
+        });
+        return newPayPeriod.payPeriodId
+    }
+    else{
+        return foundPayPeriodId;
+    }
+}
