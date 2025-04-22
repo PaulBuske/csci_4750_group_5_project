@@ -13,6 +13,7 @@ import React, { useEffect } from "react";
 import type { ProjectUser, ValidSession } from "@/app/types/project-types.ts";
 import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
 import TimePunchModal from "@/app/ui/time-punch-modal.tsx";
+import PayPeriodTable from "@/app/ui/pay-period-table.tsx";
 
 export default function Dashboard() {
     const [currentValidSession, setCurrentValidSession] = React.useState<
@@ -131,6 +132,8 @@ export default function Dashboard() {
                             )}
                         </Box>
                     </Stack>
+
+                    <PayPeriodTable currentUser={currentUser}/>
 
                     {checkForAdminOrManagerRoles() && (
                         <Stack maxWidth="80vw" margin="auto" marginTop={4}>

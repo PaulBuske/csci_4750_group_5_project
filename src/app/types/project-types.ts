@@ -18,11 +18,13 @@ export type TimeEntry = {
     clockInTime: Date;
     clockOutTime?: Date | null;
     minutesWorked?: number | null;
+    updatedAt?: Date | null;
     notes?: string | null;
     payPeriodId?: string;
 };
 
 export type PayPeriod = {
+    payPeriodId: string;
     userId: string;
     startDate: Date;
     endDate: Date;
