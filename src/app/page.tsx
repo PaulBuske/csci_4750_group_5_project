@@ -31,15 +31,6 @@ export default function Home() {
                 >
                     Login
                 </Button>
-{/*                <Button
-                    variant="outlined"
-                    color="primary"
-                    component={Link}
-                    href="/signup"
-                    sx={{ mx: 1 }}
-                >
-                    Sign Up
-                </Button>*/}
             </Box>
         </Box>
     );
