@@ -81,79 +81,55 @@ const PayPeriodTable = ({ currentUser }: PayPeriodTableProps) => {
     const [currentPayPeriod, setCurrentPayPeriod] = React.useState<PayPeriod | null>(null);
 
     useEffect(() => {
-        console.log(`Current User: ${currentUser?.userId}`);
         const fetchTimeEntriesForPayPeriod = async (
             userId: string,
             payPeriodLookup: Date,
         ) => {
             try {
+                // Get or create pay period
                 const payPeriodId = await getOrCreatePayPeriodIfNotExists(
-                    currentUser!.userId,
+                    userId,
                     payPeriodLookup,
                 );
                 if (!payPeriodId) {
                     setErrorMessage("Pay period not found.");
                     return;
-                } else {
-                    setCurrentPayPeriodId(payPeriodId);
                 }
-            } catch (e: unknown) {
-                if (e instanceof Error) {
-                    setErrorMessage(e.message);
-                    console.error("Failed to fetch pay period:", e.message);
-                    return
-                } else {
-                    console.error("Unexpected error fetching pay period:", e);
-                    setErrorMessage("Unexpected error fetching pay period");
-                    return
-                }
-            }
-            try {
+                setCurrentPayPeriodId(payPeriodId);
+
+                // Get pay period details
                 const payPeriod = await getPayPeriodByPeriodIdAndUserId(
-                    currentPayPeriodId!,
-                    currentUser!.userId,
+                    payPeriodId,  // Use local variable instead of state
+                    userId,
                 );
                 if (!payPeriod) {
                     setErrorMessage("Pay period not found.");
                     return;
-                } else {
-                    setCurrentPayPeriod(payPeriod!);
                 }
-            } catch (e: unknown) {
-                if (e instanceof Error) {
-                    setErrorMessage(e.message);
-                    console.error("Failed to fetch pay period:", e.message);
-                    return
-                } else {
-                    console.error("Unexpected error fetching pay period:", e);
-                    setErrorMessage("Unexpected error fetching pay period");
-                    return
-                }
-            }
+                setCurrentPayPeriod(payPeriod);
 
-            try {
-                const timeEntries = await getTimeEntriesByPayPeriodIdAndUserId(currentUser!.userId,
-                    currentPayPeriodId!);
+                // Get time entries
+                const timeEntries = await getTimeEntriesByPayPeriodIdAndUserId(
+                    userId,
+                    payPeriodId,  // Use local variable instead of state
+                );
 
                 if (!timeEntries || timeEntries.length === 0) {
-                    setErrorMessage("No time entries found for this pay period.",);
+                    setErrorMessage("No time entries found for this pay period.");
                     return;
-                } else {
-                    setDisplayedTimeEntries(timeEntries);
                 }
+                setDisplayedTimeEntries(timeEntries as TimeEntry[]);
+
             } catch (e: unknown) {
                 if (e instanceof Error) {
                     setErrorMessage(e.message);
-                    console.error("Failed to fetch time entries:", e.message);
-                    return
+                    console.error("Failed to fetch data:", e.message);
                 } else {
-                    console.error("Unexpected error fetching time entries:", e);
-                    setErrorMessage("Unexpected error fetching time entries");
-                    return
+                    setErrorMessage("Unexpected error fetching data");
+                    console.error("Unexpected error:", e);
                 }
             }
         };
-
         if (!currentUser || !currentUser.userId) {
             setErrorMessage("User not found.");
             return;
@@ -230,7 +206,7 @@ const PayPeriodTable = ({ currentUser }: PayPeriodTableProps) => {
                                     {row.clockOut?.toLocaleTimeString()}
                                 </TableCell>
                                 <TableCell align="right">
-                                    {row.hoursWorked}
+                                    {ccyFormat(row.hoursWorked)}
                                 </TableCell>
                                 <TableCell align="right">
                                     {ccyFormat(row.earned)}
