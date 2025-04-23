@@ -1,18 +1,13 @@
 "use client";
 
-import { getUser, verifySession } from "@/app/lib/dal.ts";
-import {
-    Alert,
-    Box,
-    CircularProgress,
-    Stack,
-    Typography,
-} from "@mui/material";
+import { getUser, verifySession } from "@/app/lib/data-access-layer.ts";
+import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import UserTable from "@/app/ui/user-table.tsx";
 import React, { useEffect } from "react";
 import type { ProjectUser, ValidSession } from "@/app/types/project-types.ts";
 import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
 import TimePunchModal from "@/app/ui/time-punch-modal.tsx";
+import PayPeriodTable from "@/app/ui/pay-period-table.tsx";
 
 export default function Dashboard() {
     const [currentValidSession, setCurrentValidSession] = React.useState<
@@ -23,6 +18,7 @@ export default function Dashboard() {
         null,
     );
     const [loading, setLoading] = React.useState(true);
+    const [reload, setReload] = React.useState(false);
 
     useEffect(() => {
         verifySession().then((session) => {
@@ -68,10 +64,11 @@ export default function Dashboard() {
             setError(error);
             console.error("Failed to fetch user:", error);
         });
-    }, [currentUser?.userId, error]);
+    }, [error]);
 
     function checkForAdminOrManagerRoles() {
-        return currentUser?.role?.toString() === "ADMIN" || currentUser?.role?.toString() === "MANAGER";
+        return currentUser?.role?.toString() === "ADMIN" ||
+            currentUser?.role?.toString() === "MANAGER";
     }
 
     return (
@@ -93,51 +90,62 @@ export default function Dashboard() {
                 <Box>
                     <Stack spacing={2}>
                         <Box>
-                            <LandingPageAppBar
-                                props={{ currentUser: currentUser }}
-                            />
+                            <LandingPageAppBar currentUser={currentUser} />
                             {currentValidSession && (
-                                <Stack>
-                                    <Typography variant="h4" sx={{ mt: 2 }}>
-                                        Welcome back,
-                                        {currentUser?.name
-                                            ? ` ${currentUser.name}`
-                                            : "Error loading name."}
-                                    </Typography>
-                                    <Typography variant="h5" sx={{ mt: 2 }}>
-                                        Your email is:
-                                        {currentUser?.email
-                                            ? ` ${currentUser.email}`
-                                            : "Error loading email."}
-                                    </Typography>
-                                    <Typography>
-                                        Your current role is:
-                                        {currentUser?.role
-                                            ? ` ${currentUser.role}`
-                                            : "Error loading role."}
-                                    </Typography>
-                                    <Typography>
-                                        Your current hourly rate is:
-                                        {currentUser?.hourlyRate
-                                            ? ` $${
-                                                currentUser.hourlyRate.toFixed(
-                                                    2,
-                                                )
-                                            }`
-                                            : "Error loading pay rate."}
-                                    </Typography>
-                                    <TimePunchModal currentUser={currentUser}/>
-                                </Stack>
+                                <Box
+                                    display='flex'
+                                    flexDirection='column'
+                                    justifyContent='space-between'
+                                    width="100%"
+                                    height="min-content"
+                                >
+                                    <Box
+                                        display="flex"
+                                        flexDirection="row"
+                                        justifyContent={'space-between'}
+                                    >
+                                        <Stack>
+                                            <Typography variant="h4" sx={{ mt: 2 }}>
+                                                Welcome back,
+                                                {currentUser?.name
+                                                    ? ` ${currentUser.name}`
+                                                    : "Error loading name."}
+                                            </Typography>
+                                            <Typography variant="h5" sx={{ mt: 2 }}>
+                                                Your email is:
+                                                {currentUser?.email
+                                                    ? ` ${currentUser.email}`
+                                                    : "Error loading email."}
+                                            </Typography>
+                                            <Typography>
+                                                Your current role is:
+                                                {currentUser?.role
+                                                    ? ` ${currentUser.role}`
+                                                    : "Error loading role."}
+                                            </Typography>
+                                            <Typography>
+                                                Your current hourly rate is:
+                                                {currentUser?.hourlyRate
+                                                    ? ` $${
+                                                        currentUser.hourlyRate
+                                                            .toFixed(
+                                                                2,
+                                                            )
+                                                    }`
+                                                    : "Error loading pay rate."}
+                                            </Typography>
+                                        </Stack>
+                                        <TimePunchModal currentUser={currentUser} setReload={setReload} />
+                                    </Box>
+                                    <PayPeriodTable currentUser={currentUser} reload={reload} />
+                                    {
+                                        checkForAdminOrManagerRoles() && (
+                                            <UserTable/>)
+                                    }
+                                </Box>
                             )}
                         </Box>
                     </Stack>
-
-                    {checkForAdminOrManagerRoles() && (
-                        <Stack maxWidth="80vw" margin="auto" marginTop={4}>
-                            <Typography variant="h3">Current Users:</Typography>
-                            <UserTable/>
-                        </Stack>
-                    )}
                 </Box>
             )}
         </Box>

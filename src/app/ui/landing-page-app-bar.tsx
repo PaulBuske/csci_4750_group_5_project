@@ -10,7 +10,7 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import PunchClockIcon from '@mui/icons-material/PunchClock';
-import type { ProjectUser } from '@/app/types/project-types';
+import type { ProjectUser } from '@/app/types/project-types.ts';
 import { useRouter } from 'next/navigation';
 
 const settings = ['Logout'];
@@ -19,7 +19,7 @@ type LandingPageAppBarProps = {
     currentUser?: ProjectUser | null | undefined;
 }
 
-const LandingPageAppBar = ({ props }: { props: LandingPageAppBarProps }) => {
+const LandingPageAppBar = ({ currentUser }: LandingPageAppBarProps) => {
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
     const router = useRouter();
 
@@ -76,8 +76,8 @@ const LandingPageAppBar = ({ props }: { props: LandingPageAppBarProps }) => {
                     <Box>
                         <Tooltip title='Account menu'>
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt={props.currentUser?.email || 'User'}>
-                                    {props.currentUser?.name?.charAt(0) || 'U'}
+                                <Avatar alt={currentUser?.email || 'User'}>
+                                    {currentUser?.name?.charAt(0) || 'U'}
                                 </Avatar>
                             </IconButton>
                         </Tooltip>

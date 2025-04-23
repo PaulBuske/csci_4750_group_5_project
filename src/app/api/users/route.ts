@@ -1,6 +1,6 @@
 import {NextResponse} from 'next/server';
 import {PrismaClient} from '@prisma/client';
-import {verifySession} from "@/app/lib/dal.ts";
+import {verifySession} from "@/app/lib/data-access-layer.ts";
 
 const prisma = new PrismaClient();
 
