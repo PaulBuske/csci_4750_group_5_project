@@ -1,6 +1,6 @@
 import {dbSingleton} from "@/app/lib/dbSingleton.ts";
 import {NextResponse} from "next/server";
-import {createOrGetPayPeriodIfNotExists} from "@/app/lib/dal.ts";
+import {getOrCreatePayPeriodIfNotExists} from "@/app/lib/data-access-layer.ts";
 
 export async function POST(request: Request) {
 
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
         const currentDate = new Date(timestamp);
 
-        const currentPayPeriodId = await createOrGetPayPeriodIfNotExists(userId, currentDate);
+        const currentPayPeriodId = await getOrCreatePayPeriodIfNotExists(userId, currentDate);
 
         if(type == 'in'){
             const clockInTime = new Date(timestamp);

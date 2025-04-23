@@ -20,7 +20,7 @@ export type TimeEntry = {
     minutesWorked?: number | null;
     updatedAt?: Date | null;
     notes?: string | null;
-    payPeriodId?: string;
+    payPeriodId: string;
 };
 
 export type PayPeriod = {

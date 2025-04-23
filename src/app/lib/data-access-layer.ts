@@ -39,10 +39,9 @@ export const getUser = cache(async () => {
             redirect('/login')
         }
         if(foundUser.userId) {
-            const projectUser ={
+            return {
                 ...foundUser, hourlyRate: foundUser.hourlyRate.toNumber()
             }
-            return projectUser
         }
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -52,7 +51,7 @@ export const getUser = cache(async () => {
     }
 })
 
-export const createOrGetPayPeriodIfNotExists = async (userId: string, currentDate: Date) => {
+export const getOrCreatePayPeriodIfNotExists = async (userId: string, currentDate: Date) => {
 
     const existingPayPeriod = await dbSingleton.payPeriod.findFirst({
         where: {
@@ -80,5 +79,57 @@ export const createOrGetPayPeriodIfNotExists = async (userId: string, currentDat
     }
     else{
         return foundPayPeriodId;
+    }
+}
+
+export const getTimeEntriesByPayPeriodIdAndUserId = async (userId: string, payPeriodId: string) => {
+
+    try {
+        const timeEntries = await dbSingleton.timeEntry.findMany({
+            where: {
+                userId,
+                payPeriodId,
+            },
+        });
+
+        if (!timeEntries) {
+            console.error('No time entries found for this pay period and user.');
+            return [];
+        }
+        return timeEntries;
+
+    } catch (e: unknown) {
+        if (e instanceof Error) {
+            console.error('Error fetching time entries:', e.message);
+        }
+        return [];
+    }
+}
+
+export const getPayPeriodByPeriodIdAndUserId = async (payPeriodId: string, userId: string) => {
+    try {
+        const payPeriod = await dbSingleton.payPeriod.findFirst({
+            where: {
+                payPeriodId,
+                userId,
+            },
+        });
+
+        if (!payPeriod) {
+            console.error('No pay period found for this ID and user.');
+            return null;
+        }
+        if(payPeriod.payPeriodId) {
+            return {
+                ...payPeriod,
+                totalHours: payPeriod.totalHours.toNumber(),
+                grossPay: payPeriod.grossPay.toNumber(),
+            }
+        }
+    } catch (e: unknown) {
+        if (e instanceof Error) {
+            console.error('Error fetching pay period:', e.message);
+        }
+        return null;
     }
 }
