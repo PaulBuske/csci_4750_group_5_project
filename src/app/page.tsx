@@ -6,13 +6,11 @@ export default function Home() {
 
     return (
         <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100vh',
-            }}
+            display='flex'
+            flexDirection='column'
+            alignItems='center'
+            justifyContent='center'
+            height='100vh'
         >
             <Typography variant="h2" component="h1" gutterBottom>
                 CSCI 4750 Group 5 Project
