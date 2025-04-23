@@ -26,10 +26,11 @@ const style = {
 };
 
 type TimePunchModalProps = {
-    currentUser?: ProjectUser | null
+    currentUser?: ProjectUser | null,
+    setReload: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const TimePunchModal = ({ currentUser }: TimePunchModalProps) => {
+const TimePunchModal = ({ currentUser, setReload }: TimePunchModalProps) => {
     const [open, setOpen] = React.useState(false);
     const [clockedIn, setClockedIn] = React.useState(false);
     const [selectedTime, setSelectedTime] = React.useState<Dayjs | null>(dayjs());
@@ -58,6 +59,7 @@ const TimePunchModal = ({ currentUser }: TimePunchModalProps) => {
         }
 
             setSubmitting(true)
+            setReload(false)
             try {
                 const response = await fetch('/api/time-punch', {
                     method: 'POST',
@@ -76,6 +78,7 @@ const TimePunchModal = ({ currentUser }: TimePunchModalProps) => {
                     const data = await response.json();
                     setTimeEntry(data.timeEntry);
                     setSubmitting(false)
+                    setReload(true)
                     handleClose();
                 } else {
                     console.error('Time punch failed');

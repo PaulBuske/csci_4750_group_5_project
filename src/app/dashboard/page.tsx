@@ -18,6 +18,7 @@ export default function Dashboard() {
         null,
     );
     const [loading, setLoading] = React.useState(true);
+    const [reload, setReload] = React.useState(false);
 
     useEffect(() => {
         verifySession().then((session) => {
@@ -63,7 +64,7 @@ export default function Dashboard() {
             setError(error);
             console.error("Failed to fetch user:", error);
         });
-    }, []); // Fixed: Empty dependency array to prevent infinite loop
+    }, [error]);
 
     function checkForAdminOrManagerRoles() {
         return currentUser?.role?.toString() === "ADMIN" ||
@@ -134,10 +135,13 @@ export default function Dashboard() {
                                                     : "Error loading pay rate."}
                                             </Typography>
                                         </Stack>
-                                        <TimePunchModal currentUser={currentUser} />
+                                        <TimePunchModal currentUser={currentUser} setReload={setReload} />
                                     </Box>
-                                    <PayPeriodTable currentUser={currentUser} />
-
+                                    <PayPeriodTable currentUser={currentUser} reload={reload} />
+                                    {
+                                        checkForAdminOrManagerRoles() && (
+                                            <UserTable/>)
+                                    }
                                 </Box>
                             )}
                         </Box>

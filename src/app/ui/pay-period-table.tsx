@@ -17,6 +17,10 @@ import {
     getOrCreatePayPeriodIfNotExists, getPayPeriodByPeriodIdAndUserId,
     getTimeEntriesByPayPeriodIdAndUserId,
 } from "@/app/lib/data-access-layer.ts";
+import {DatePicker} from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 
 const TAX_RATE = 0.12;
 
@@ -64,20 +68,20 @@ const calculateNetPay = (grossPay: number, payStubTaxes: number) =>
     grossPay - payStubTaxes;
 
 type PayPeriodTableProps = {
-    currentUser?: ProjectUser | null;
+    currentUser?: ProjectUser | null,
+    reload?: boolean
 };
 
 const today = new Date();
 
-const PayPeriodTable = ({ currentUser }: PayPeriodTableProps) => {
-    const [payPeriodLookup] = React.useState<Date>(today);
+const PayPeriodTable = ({ currentUser, reload }: PayPeriodTableProps) => {
+    const [payPeriodLookup, setPayPeriodLookup] = React.useState<Date>(today);
     const [displayedTimeEntries, setDisplayedTimeEntries] = React.useState<TimeEntry[]>([]);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     const [timeEntryRows, setTimeEntryRows] = React.useState<TimeEntryRow[]>([]);
     const [payStubGrossPay, setPayStubGrossPay] = React.useState<number>(0);
     const [payStubTaxes, setPayStubTaxes] = React.useState<number>(0);
     const [payStubNetPay, setPayStubNetPay] = React.useState<number>(0);
-    const [currentPayPeriodId, setCurrentPayPeriodId] = React.useState<string | null>(null);
     const [currentPayPeriod, setCurrentPayPeriod] = React.useState<PayPeriod | null>(null);
 
     useEffect(() => {
@@ -95,7 +99,6 @@ const PayPeriodTable = ({ currentUser }: PayPeriodTableProps) => {
                     setErrorMessage("Pay period not found.");
                     return;
                 }
-                setCurrentPayPeriodId(payPeriodId);
 
                 // Get pay period details
                 const payPeriod = await getPayPeriodByPeriodIdAndUserId(
@@ -136,7 +139,7 @@ const PayPeriodTable = ({ currentUser }: PayPeriodTableProps) => {
         } else {
             fetchTimeEntriesForPayPeriod(currentUser.userId, payPeriodLookup).then();
         }
-    }, [currentUser, payPeriodLookup]);
+    }, [currentUser, payPeriodLookup, reload, errorMessage]);
 
     // Calculate pay information when time entries or user changes
     useEffect(() => {
@@ -160,7 +163,7 @@ const PayPeriodTable = ({ currentUser }: PayPeriodTableProps) => {
             setPayStubTaxes(0);
             setPayStubNetPay(0);
         }
-    }, [displayedTimeEntries, currentUser]);
+    }, [displayedTimeEntries, currentUser, reload, errorMessage]);
 
     return (
         <Box>
@@ -168,6 +171,14 @@ const PayPeriodTable = ({ currentUser }: PayPeriodTableProps) => {
                 {errorMessage && (
                     <Typography color="error">{errorMessage}</Typography>
                 )}
+                <Typography>Pick date to view previous pay periods:</Typography>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker defaultValue={dayjs(payPeriodLookup)} onChange={(newValue) => {
+                    if (newValue) {
+                        setPayPeriodLookup(newValue.toDate());
+                    }
+                }}/>
+                </LocalizationProvider>
             </Stack>
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 700 }} aria-label="spanning table">
