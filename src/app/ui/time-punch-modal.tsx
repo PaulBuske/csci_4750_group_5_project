@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -10,6 +9,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import dayjs, { Dayjs } from 'dayjs';
 import { Stack } from '@mui/material';
+import React from "react";
 
 const style = {
     position: 'absolute',
@@ -26,11 +26,11 @@ const style = {
 };
 
 type TimePunchModalProps = {
-    currentUser?: ProjectUser | null,
-    setReload: React.Dispatch<React.SetStateAction<boolean>>;
-}
+    currentUser?: ProjectUser | null;
+    onPunchSuccess?: () => void;
+};
 
-const TimePunchModal = ({ currentUser, setReload }: TimePunchModalProps) => {
+const TimePunchModal = ({ currentUser,  onPunchSuccess }: TimePunchModalProps) => {
     const [open, setOpen] = React.useState(false);
     const [clockedIn, setClockedIn] = React.useState(false);
     const [selectedTime, setSelectedTime] = React.useState<Dayjs | null>(dayjs());
@@ -59,7 +59,6 @@ const TimePunchModal = ({ currentUser, setReload }: TimePunchModalProps) => {
         }
 
             setSubmitting(true)
-            setReload(false)
             try {
                 const response = await fetch('/api/time-punch', {
                     method: 'POST',
@@ -78,7 +77,9 @@ const TimePunchModal = ({ currentUser, setReload }: TimePunchModalProps) => {
                     const data = await response.json();
                     setTimeEntry(data.timeEntry);
                     setSubmitting(false)
-                    setReload(true)
+                    if(onPunchSuccess) {
+                        onPunchSuccess();
+                    }
                     handleClose();
                 } else {
                     console.error('Time punch failed');

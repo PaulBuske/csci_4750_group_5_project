@@ -3,7 +3,7 @@
 import { getUser, verifySession } from "@/app/lib/data-access-layer.ts";
 import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import UserTable from "@/app/ui/user-table.tsx";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import type { ProjectUser, ValidSession } from "@/app/types/project-types.ts";
 import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
 import TimePunchModal from "@/app/ui/time-punch-modal.tsx";
@@ -18,53 +18,63 @@ export default function Dashboard() {
         null,
     );
     const [loading, setLoading] = React.useState(true);
-    const [reload, setReload] = React.useState(false);
+    const [timeEntryRefreshTrigger, setTimeEntryRefreshTrigger] = React.useState(0);
+
+    const refreshSession = useCallback(async () => {
+        try {
+            const session = await verifySession();
+            const currentSession = {
+                ...session,
+                userId: session.userId.toString(),
+            };
+            if (!currentSession.isAuth || !currentSession.userId) {
+                setError(new Error("Session not found or invalid"));
+                console.error("Session not found or invalid");
+                return false;
+            }
+            setCurrentValidSession(currentSession);
+            return true;
+        } catch (e) {
+            if (e instanceof Error && e.message != null) {
+                setError(e);
+                console.error("Failed to fetch session:", e.message);
+            } else {
+                setError(new Error("Unexpected error fetching session"));
+                console.error("Unexpected error fetching session:", e);
+            }
+            return false;
+        }
+    }, []);
 
     useEffect(() => {
-        verifySession().then((session) => {
+        const loadInitialData = async () => {
+
+            const sessionValid = await refreshSession();
+            if (!sessionValid) return;
+
             try {
-                const currentSession = {
-                    ...session,
-                    userId: session.userId.toString(),
-                };
-                if (!currentSession.isAuth || !currentSession.userId) {
-                    const sessionError = new Error(
-                        "Session not found or invalid",
-                    );
-                    setError(sessionError);
-                    console.error("Session not found or invalid");
+                const foundUser = await getUser();
+                if (!foundUser) {
+                    setError(new Error("User not found"));
+                    console.error("User not found");
                     return;
                 }
-                setCurrentValidSession(currentSession);
-            } catch (e) {
-                if (e instanceof Error && e.message != null) {
-                    setError(e);
-                    console.error("Failed to fetch session:", e.message);
-                    return;
-                } else {
-                    console.error("Unexpected error fetching session:", error);
-                    setError(new Error("Unexpected error fetching session"));
-                }
+                setCurrentUser(foundUser);
+            } catch (error) {
+                setError(error instanceof Error ? error : new Error("Failed to fetch user"));
+                console.error("Failed to fetch user:", error);
+            } finally {
+                setLoading(false);
             }
-        })
-            .catch((error) => {
-                setError(error);
-                console.error("Failed to fetch session:", error);
-            });
-        getUser().then((foundUser: ProjectUser | null | undefined) => {
-            if (!foundUser) {
-                const userError = new Error("User not found");
-                setError(userError);
-                console.error("User not found");
-                return;
-            }
-            setCurrentUser(foundUser);
-            setLoading(false);
-        }).catch((error) => {
-            setError(error);
-            console.error("Failed to fetch user:", error);
-        });
-    }, [error]);
+        };
+
+        loadInitialData().then();
+    }, [refreshSession]);
+
+    const handleTimePunchEvent = async () => {
+        await refreshSession();
+        setTimeEntryRefreshTrigger(prev => prev + 1);
+    };
 
     function checkForAdminOrManagerRoles() {
         return currentUser?.role?.toString() === "ADMIN" ||
@@ -135,9 +145,15 @@ export default function Dashboard() {
                                                     : "Error loading pay rate."}
                                             </Typography>
                                         </Stack>
-                                        <TimePunchModal currentUser={currentUser} setReload={setReload} />
+                                        <TimePunchModal
+                                            currentUser={currentUser}
+                                            onPunchSuccess={handleTimePunchEvent}
+                                        />
                                     </Box>
-                                    <PayPeriodTable currentUser={currentUser} reload={reload} />
+                                    <PayPeriodTable
+                                        currentUser={currentUser}
+                                        refreshTrigger={timeEntryRefreshTrigger}
+                                    />
                                     {
                                         checkForAdminOrManagerRoles() && (
                                             <UserTable/>)

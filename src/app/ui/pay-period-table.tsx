@@ -68,13 +68,13 @@ const calculateNetPay = (grossPay: number, payStubTaxes: number) =>
     grossPay - payStubTaxes;
 
 type PayPeriodTableProps = {
-    currentUser?: ProjectUser | null,
-    reload?: boolean
+    currentUser?: ProjectUser | null;
+    refreshTrigger?: number;
 };
 
 const today = new Date();
 
-const PayPeriodTable = ({ currentUser, reload }: PayPeriodTableProps) => {
+const PayPeriodTable = ({ currentUser,  refreshTrigger }: PayPeriodTableProps) => {
     const [payPeriodLookup, setPayPeriodLookup] = React.useState<Date>(today);
     const [displayedTimeEntries, setDisplayedTimeEntries] = React.useState<TimeEntry[]>([]);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -139,9 +139,8 @@ const PayPeriodTable = ({ currentUser, reload }: PayPeriodTableProps) => {
         } else {
             fetchTimeEntriesForPayPeriod(currentUser.userId, payPeriodLookup).then();
         }
-    }, [currentUser, payPeriodLookup, reload, errorMessage]);
+    }, [currentUser, payPeriodLookup, refreshTrigger, errorMessage]);
 
-    // Calculate pay information when time entries or user changes
     useEffect(() => {
         if (displayedTimeEntries.length > 0 && currentUser) {
             const newTimeEntryRows = createTimeEntryRows(
@@ -163,17 +162,20 @@ const PayPeriodTable = ({ currentUser, reload }: PayPeriodTableProps) => {
             setPayStubTaxes(0);
             setPayStubNetPay(0);
         }
-    }, [displayedTimeEntries, currentUser, reload, errorMessage]);
+    }, [displayedTimeEntries, currentUser, refreshTrigger, errorMessage]);
 
     return (
         <Box>
-            <Stack>
+            <Stack sx={{paddingTop: '2rem', paddingBottom: '2rem'}}
+            >
                 {errorMessage && (
                     <Typography color="error">{errorMessage}</Typography>
                 )}
                 <Typography>Pick date to view previous pay periods:</Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker defaultValue={dayjs(payPeriodLookup)} onChange={(newValue) => {
+                <DatePicker
+                    defaultValue={dayjs(payPeriodLookup)}
+                    onChange={(newValue) => {
                     if (newValue) {
                         setPayPeriodLookup(newValue.toDate());
                     }
