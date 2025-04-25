@@ -10,8 +10,8 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import PunchClockIcon from '@mui/icons-material/PunchClock';
-import type { ProjectUser } from '@/app/types/project-types.ts';
-import { useRouter } from 'next/navigation';
+import type {ProjectUser} from '@/app/types/project-types.ts';
+import {useRouter} from 'next/navigation';
 
 const settings = ['Logout'];
 

@@ -1,11 +1,11 @@
 // src/app/dashboard/page.tsx
 "use client";
 
-import { getUser, verifySession } from "@/app/lib/data-access-layer.ts";
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import {getUser, verifySession} from "@/app/lib/data-access-layer.ts";
+import {Alert, Box, CircularProgress, Stack, Typography} from "@mui/material";
 import UserTable from "@/app/ui/user-table.tsx";
-import React, { useCallback, useEffect } from "react";
-import {ProjectUser,  ValidSession} from "@/app/types/project-types.ts";
+import React, {useCallback, useEffect} from "react";
+import {ProjectUser, ValidSession} from "@/app/types/project-types.ts";
 import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
 import TimePunchModal from "@/app/ui/time-punch-modal.tsx";
 import PayPeriodTable from "@/app/ui/pay-period-table.tsx";
@@ -40,7 +40,7 @@ export default function Dashboard() {
             console.error("Failed to fetch session:", e instanceof Error ? e.message : e);
             return false;
         }
-    }, [error]);
+    }, []);
 
     // Initial data loading
     useEffect(() => {
@@ -80,7 +80,7 @@ export default function Dashboard() {
     }, [refreshSession, currentValidSession?.userId]); // Re-run if session user ID changes
 
     const handleTimePunchEvent = async () => {
-        setTimeEntryRefreshTrigger(prev => prev + 1);
+        await setTimeEntryRefreshTrigger(prev => prev + 1);
     };
 
     function checkForAdminOrManagerRoles() {
