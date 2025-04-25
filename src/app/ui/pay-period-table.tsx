@@ -166,19 +166,19 @@ const PayPeriodTable = ({ currentUser, refreshTrigger }: PayPeriodTableProps) =>
     return (
         <Box>
             <Stack
-            paddingTop='2rem'
-            paddingBottom='2rem'
+                paddingTop='2rem'
+                paddingBottom='2rem'
             >
                 {errorMessage && (
                     <Typography color="error">{errorMessage}</Typography>
                 )}
                 <Typography>Pick date to view previous pay periods:</Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker defaultValue={dayjs(payPeriodLookup)} onChange={(newValue) => {
-                    if (newValue) {
-                        setPayPeriodLookup(newValue.toDate());
-                    }
-                }}/>
+                    <DatePicker defaultValue={dayjs(payPeriodLookup)} onChange={(newValue) => {
+                        if (newValue) {
+                            setPayPeriodLookup(newValue.toDate());
+                        }
+                    }}/>
                 </LocalizationProvider>
             </Stack>
             <TableContainer component={Paper}>
@@ -187,11 +187,11 @@ const PayPeriodTable = ({ currentUser, refreshTrigger }: PayPeriodTableProps) =>
                         <TableRow>
                             <TableCell align="left" colSpan={3}>
                                 Pay Period Start: {currentPayPeriod?.startDate
-                                    .toLocaleDateString() || "N/A"}
+                                .toLocaleDateString() || "N/A"}
                             </TableCell>
                             <TableCell align="left">
                                 End: {currentPayPeriod?.endDate
-                                    .toLocaleDateString() || "N/A"}
+                                .toLocaleDateString() || "N/A"}
                             </TableCell>
                             <TableCell align="right">Total Pay</TableCell>
                         </TableRow>

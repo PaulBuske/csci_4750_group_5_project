@@ -90,6 +90,7 @@ export const getTimeEntriesByPayPeriodIdAndUserId = async (userId: string, payPe
                 userId,
                 payPeriodId,
             },
+            orderBy: {clockInTime: 'asc'},
         });
 
         if (!timeEntries) {
@@ -129,6 +130,32 @@ export const getPayPeriodByPeriodIdAndUserId = async (payPeriodId: string, userI
     } catch (e: unknown) {
         if (e instanceof Error) {
             console.error('Error fetching pay period:', e.message);
+        }
+        return null;
+    }
+}
+
+export const getAnyNullTimeEntryClockedInWithUserId = async (userId: string) =>{
+    try{
+        const latestTimeEntry = await dbSingleton.timeEntry.findFirst({
+            where: {
+                userId,
+                clockOutTime: null,
+            },
+            orderBy: {
+                clockInTime: 'desc',
+            },
+        });
+
+        if (!latestTimeEntry) {
+            console.error('No time entry found for this user.');
+            return null;
+        }
+        return latestTimeEntry;
+    }
+    catch(e: unknown) {
+        if (e instanceof Error) {
+            console.error('Error fetching latest time entry:', e.message);
         }
         return null;
     }
