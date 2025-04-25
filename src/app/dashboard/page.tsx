@@ -3,13 +3,14 @@
 
 import {getUser, verifySession} from "@/app/lib/data-access-layer.ts";
 import {Alert, Box, CircularProgress, Stack, Typography} from "@mui/material";
-import UserTable from "@/app/ui/user-table.tsx";
 import React, {useCallback, useEffect} from "react";
 import {ProjectUser, ValidSession} from "@/app/types/project-types.ts";
 import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
 import TimePunchModal from "@/app/ui/time-punch-modal.tsx";
 import PayPeriodTable from "@/app/ui/pay-period-table.tsx";
 import UserManualButton from "@/app/ui/user-manual-button.tsx";
+import AdminUserTable from "@/app/ui/admin-user-table.tsx";
+import ManagementUserTable from "@/app/ui/management-user-table.tsx";
 
 export default function Dashboard() {
     const [currentValidSession, setCurrentValidSession] = React.useState<
@@ -83,9 +84,6 @@ export default function Dashboard() {
         await setTimeEntryRefreshTrigger(prev => prev + 1);
     };
 
-    function checkForAdminOrManagerRoles() {
-        return currentUser?.role === "ADMIN" || currentUser?.role === "MANAGER";
-    }
 
     return (
         <Box
@@ -148,9 +146,14 @@ export default function Dashboard() {
                                     refreshTrigger={timeEntryRefreshTrigger}
                                 />
 
-                                {checkForAdminOrManagerRoles() && (
-                                    <UserTable />
-                                )}
+                                {
+                                    currentUser.role === 'ADMIN' &&
+                                    <AdminUserTable/>
+                                }
+                                {
+                                    currentUser.role === 'MANAGER' &&
+                                    <ManagementUserTable/>
+                                }
                             </>
                         ) : (
                             !error && <Typography>User data not available.</Typography>
