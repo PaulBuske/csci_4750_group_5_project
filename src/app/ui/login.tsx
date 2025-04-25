@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, Avatar, Box, Button, CircularProgress, Container, Paper, TextField, Typography } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import UserManualButton from "@/app/ui/user-manual-button.tsx";
 
 export default function LoginForm() {
     const router = useRouter();
@@ -44,7 +45,8 @@ export default function LoginForm() {
         }
     }
     return (
-        <Container component="main" maxWidth="xl">
+        // Using 'xs' maxWidth to constrain overall form width
+        <Container component="main" maxWidth="xs">
             <Paper
                 elevation={3}
                 sx={{
@@ -94,15 +96,26 @@ export default function LoginForm() {
                         id="password"
                         autoComplete="current-password"
                     />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                        disabled={loading}
+                    {/* Buttons container - centers the buttons */}
+                    <Box
+                        display='flex'
+                        flexDirection='column'
+                        alignItems='center' // Center items horizontally
+                        justifyContent='center'
+                        sx={{ width: '100%', mt: 1 }}
                     >
-                        {loading ? <CircularProgress size={24} /> : 'Log In'}
-                    </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            // Removed fullWidth
+                            sx={{ mt: 3, mb: 2, width: '100%', maxWidth: '300px' }} // Add maxWidth
+                            disabled={loading}
+                        >
+                            {loading ? <CircularProgress size={24} /> : 'Log In'}
+                        </Button>
+                        {/* UserManualButton uses its own defined style */}
+                        <UserManualButton loading={loading} />
+                    </Box>
                 </Box>
             </Paper>
         </Container>

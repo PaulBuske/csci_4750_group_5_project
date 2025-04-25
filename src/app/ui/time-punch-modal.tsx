@@ -1,4 +1,5 @@
-import * as React from 'react';
+import {useEffect, useState} from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
@@ -10,6 +11,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import dayjs, { Dayjs } from 'dayjs';
 import { Stack } from '@mui/material';
+import { getAnyNullTimeEntryClockedInWithUserId } from "@/app/lib/data-access-layer.ts";
 
 const style = {
     position: 'absolute',
@@ -31,12 +33,13 @@ type TimePunchModalProps = {
 };
 
 const TimePunchModal = ({ currentUser, onPunchSuccess }: TimePunchModalProps) => {
-    const [open, setOpen] = React.useState(false);
-    const [clockedIn, setClockedIn] = React.useState(false);
-    const [selectedTime, setSelectedTime] = React.useState<Dayjs | null>(dayjs());
-    const [submitting, setSubmitting] = React.useState(false);
-    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-    const [timeEntry, setTimeEntry] = React.useState<TimeEntry | null>(null);
+    const [open, setOpen] = useState(false);
+    const [selectedTime, setSelectedTime] = useState<Dayjs | null>(dayjs());
+    const [submitting, setSubmitting] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [timeEntry, setTimeEntry] = useState<TimeEntry | null>(null);
+    const [clockedIn, setClockedIn] = useState<boolean>(false);
+    const [lastTimeEntry, setLastTimeEntry] = useState<TimeEntry | null>(null);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -53,7 +56,7 @@ const TimePunchModal = ({ currentUser, onPunchSuccess }: TimePunchModalProps) =>
             return
         };
 
-        if(clockedIn && timeEntry && selectedTime.isBefore(dayjs(timeEntry.clockInTime))){
+        if(clockedIn && lastTimeEntry && selectedTime.isBefore(dayjs(lastTimeEntry.clockInTime))){
             setErrorMessage('Clock out time cannot be before clock in time.');
             return;
         }
@@ -95,13 +98,40 @@ const TimePunchModal = ({ currentUser, onPunchSuccess }: TimePunchModalProps) =>
             }
     };
 
+    useEffect(()=>{
+        const fetchTimeEntry = async ()=> {
+            if (currentUser?.userId) {
+                try {
+                    const timeEntryData = await getAnyNullTimeEntryClockedInWithUserId(currentUser.userId);
+
+                    if (timeEntryData === null) {
+                        console.log('No previous time entry found for this user.');
+                    } else {
+                        setClockedIn(!timeEntryData.clockOutTime);
+                        if (timeEntryData.payPeriodId === null) {
+                            console.warn('Fetched time entry has a null payPeriodId:', timeEntryData);
+                        } else {
+                            setLastTimeEntry(timeEntryData as TimeEntry);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching time entry:', error);
+                    setErrorMessage('An error occurred while fetching the time entry.');
+                    setClockedIn(false);
+                    setLastTimeEntry(null);
+                }
+            }
+        };
+
+        fetchTimeEntry();
+    }, [currentUser]);
     return (
         <div>
             <Button
                 onClick={handleOpen}
                 variant="contained"
                 color={clockedIn ? "secondary" : "primary"}
-                sx={{ mt: 2 }}
+                sx={{ mt: 3, mb: 2, width: '100%', maxWidth: '300px' }} // Add maxWidth
             >
                 {showClockInStatus}
             </Button>
