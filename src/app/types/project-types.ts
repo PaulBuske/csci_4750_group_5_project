@@ -1,4 +1,4 @@
-import {PayStatus, UserRole} from "@prisma/client";
+import { PayStatus, UserRole } from "@prisma/client";
 
 export type ValidSession = {
     isAuth: boolean;
@@ -14,6 +14,7 @@ export type ProjectUser = {
 };
 
 export type TimeEntry = {
+    timeEntryId: string;
     userId: string;
     clockInTime: Date;
     clockOutTime?: Date | null;
@@ -31,4 +32,14 @@ export type PayPeriod = {
     totalHours?: number | null;
     grossPay?: number | null;
     status: PayStatus;
+};
+
+export type TimeEntryRow = {
+    timeEntryId: string;
+    userId: string;
+    workedDate: Date;
+    clockInTime: Date;
+    clockOutTime: Date | null;
+    hoursWorked: number;
+    earned: number;
 };

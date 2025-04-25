@@ -40,7 +40,7 @@ export default function Dashboard() {
             console.error("Failed to fetch session:", e instanceof Error ? e.message : e);
             return false;
         }
-    }, [error]);
+    }, []);
 
     // Initial data loading
     useEffect(() => {
@@ -80,7 +80,7 @@ export default function Dashboard() {
     }, [refreshSession, currentValidSession?.userId]); // Re-run if session user ID changes
 
     const handleTimePunchEvent = async () => {
-        setTimeEntryRefreshTrigger(prev => prev + 1);
+        await setTimeEntryRefreshTrigger(prev => prev + 1);
     };
 
     function checkForAdminOrManagerRoles() {
