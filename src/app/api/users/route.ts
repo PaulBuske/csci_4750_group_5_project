@@ -10,7 +10,6 @@ export async function GET() {
 
     // Check if the user is authenticated
     if (!session) {
-        // User is not authenticated
         return new Response(null, { status: 401 })
     }
 
