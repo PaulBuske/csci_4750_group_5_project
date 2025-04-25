@@ -1,11 +1,11 @@
 // src/app/dashboard/page.tsx
 "use client";
 
-import { getUser, verifySession } from "@/app/lib/data-access-layer.ts";
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import {getUser, verifySession} from "@/app/lib/data-access-layer.ts";
+import {Alert, Box, CircularProgress, Stack, Typography} from "@mui/material";
 import UserTable from "@/app/ui/user-table.tsx";
-import React, { useCallback, useEffect } from "react";
-import {ProjectUser,  ValidSession} from "@/app/types/project-types.ts";
+import React, {useCallback, useEffect} from "react";
+import {ProjectUser, ValidSession} from "@/app/types/project-types.ts";
 import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
 import TimePunchModal from "@/app/ui/time-punch-modal.tsx";
 import PayPeriodTable from "@/app/ui/pay-period-table.tsx";

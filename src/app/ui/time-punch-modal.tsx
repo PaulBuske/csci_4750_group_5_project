@@ -1,17 +1,16 @@
-import {useEffect, useState} from 'react';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import {ProjectUser, TimeEntry} from "@/app/types/project-types.ts";
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
-import dayjs, { Dayjs } from 'dayjs';
-import { Stack } from '@mui/material';
-import { getAnyNullTimeEntryClockedInWithUserId } from "@/app/lib/data-access-layer.ts";
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
+import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
+import {TimePicker} from '@mui/x-date-pickers/TimePicker';
+import {renderTimeViewClock} from '@mui/x-date-pickers/timeViewRenderers';
+import dayjs, {Dayjs} from 'dayjs';
+import {Stack} from '@mui/material';
+import {getAnyNullTimeEntryClockedInWithUserId} from "@/app/lib/data-access-layer.ts";
 
 const style = {
     position: 'absolute',

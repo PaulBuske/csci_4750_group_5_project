@@ -3,10 +3,9 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import IconButton from "@mui/material/IconButton";
 import CheckIcon from "@mui/icons-material/Check";
 import Cancel from "@mui/icons-material/Cancel";
-import { TimeEntryRow } from "@/app/types/project-types.ts";
+import {TimeEntryRow} from "@/app/types/project-types.ts";
 
 const style = {
     position: "absolute",

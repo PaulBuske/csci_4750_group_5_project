@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import { dbSingleton } from "@/app/lib/dbSingleton.ts";
-import { Prisma } from "@prisma/client";
+import {NextResponse} from "next/server";
+import {dbSingleton} from "@/app/lib/dbSingleton.ts";
+import {Prisma} from "@prisma/client";
 
 export const DELETE = async (
     request: Request,

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Alert, Avatar, Box, Button, CircularProgress, Container, Paper, TextField, Typography } from '@mui/material';
+import React, {useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {Alert, Avatar, Box, Button, CircularProgress, Container, Paper, TextField, Typography} from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import UserManualButton from "@/app/ui/user-manual-button.tsx";
 
