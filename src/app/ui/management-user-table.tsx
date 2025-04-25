@@ -17,7 +17,6 @@ const EXCLUDED_FIELDS = [
     "password",
     "resetToken",
     "resetTokenExpiresAt",
-    "hourlyRate",
     "role",
     "createdAt",
     "updatedAt"
