@@ -148,7 +148,7 @@ export default function Dashboard() {
 
                                 {
                                     currentUser.role === 'ADMIN' &&
-                                    <AdminUserTable/>
+                                    <AdminUserTable currentUser={currentUser}/>
                                 }
                                 {
                                     currentUser.role === 'MANAGER' &&
