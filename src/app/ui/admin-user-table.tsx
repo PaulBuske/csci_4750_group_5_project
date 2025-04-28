@@ -11,7 +11,7 @@ import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {formatDate} from "@/app/helper-functions.ts";
 import {Button} from "@mui/material";
 import AddUserModal from "@/app/ui/add-user-modal.tsx";
-import ResetPasswordModal from "@/app/ui/reset-password-modal";
+import ResetPasswordModal from "@/app/ui/reset-password-modal.tsx";
 
 interface AdminUserTableProps {
     currentUser: ProjectUser;
@@ -120,12 +120,10 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         setIsClient(true);
 
         const fetchUsers = async () => {
-            setLoading(true);
             setErrorState(false);
             try {
                 const response = await fetch("/api/users");
@@ -138,7 +136,9 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                         ...user,
                     }));
                     setCurrentUsers(usersWithId);
-                    setColumns(generateColumns(usersWithId[0]));
+                    if (columns.length === 0) {
+                        setColumns(generateColumns(usersWithId[0]));
+                    }
                 } else {
                     setCurrentUsers([]);
                     setColumns([]);
@@ -160,8 +160,10 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             }
         };
 
-        fetchUsers();
-    }, []);
+        if (loading) {
+            fetchUsers();
+        }
+    }, [loading]);
 
     if (!isClient) {
         return null;
