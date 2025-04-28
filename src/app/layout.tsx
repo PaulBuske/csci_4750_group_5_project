@@ -1,4 +1,4 @@
-import type {Metadata} from "next";
+import type { Metadata } from "next";
 import React from "react";
 import "@/app/globals.css";
 import ThemeRegistry from "@/app/theme-registry.tsx";
@@ -9,15 +9,15 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-                                       children,
-                                   }: Readonly<{
+    children,
+}: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
         <html lang="en">
-        <body>
-        <ThemeRegistry>{children}</ThemeRegistry>
-        </body>
+            <body>
+                <ThemeRegistry>{children}</ThemeRegistry>
+            </body>
         </html>
     );
 }

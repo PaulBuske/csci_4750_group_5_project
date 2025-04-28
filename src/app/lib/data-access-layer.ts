@@ -1,27 +1,27 @@
-'use server'
+"use server";
 
-import {cookies} from 'next/headers'
-import {decrypt} from "@/app/lib/sessions.ts"
-import {dbSingleton} from "@/app/lib/dbSingleton.ts"
-import {cache} from "react";
-import {redirect} from "next/navigation";
-import {checkPayPeriodRange} from "@/app/api/time-punch/checkPayPeriodRange.ts";
+import { cookies } from "next/headers";
+import { decrypt } from "@/app/lib/sessions.ts";
+import { dbSingleton } from "@/app/lib/dbSingleton.ts";
+import { cache } from "react";
+import { redirect } from "next/navigation";
+import { checkPayPeriodRange } from "@/app/api/time-punch/checkPayPeriodRange.ts";
 
 export const verifySession = cache(async () => {
-    const providedCookies = await cookies()
-    const cookie = providedCookies.get('session')?.value
-    const session = await decrypt(cookie)
+    const providedCookies = await cookies();
+    const cookie = providedCookies.get("session")?.value;
+    const session = await decrypt(cookie);
 
     if (!session?.userId) {
-        redirect('/login')
+        redirect("/login");
     }
 
-    return { isAuth: true, userId: session.userId }
-})
+    return { isAuth: true, userId: session.userId };
+});
 
 export const getUser = cache(async () => {
-    const session = await verifySession()
-    if (!session) return null
+    const session = await verifySession();
+    if (!session) return null;
 
     try {
         const foundUser = await dbSingleton.user.findUnique({
@@ -33,26 +33,29 @@ export const getUser = cache(async () => {
                 hourlyRate: true,
                 role: true,
             },
-        })
+        });
         if (!foundUser) {
-            alert('User not found')
-            redirect('/login')
+            alert("User not found");
+            redirect("/login");
         }
-        if(foundUser.userId) {
+        if (foundUser.userId) {
             return {
-                ...foundUser, hourlyRate: foundUser.hourlyRate.toNumber()
-            }
+                ...foundUser,
+                hourlyRate: foundUser.hourlyRate.toNumber(),
+            };
         }
     } catch (error: unknown) {
         if (error instanceof Error) {
-            console.error('Failed to fetch user:', error.message)
+            console.error("Failed to fetch user:", error.message);
         }
-        return null
+        return null;
     }
-})
+});
 
-export const getOrCreatePayPeriodIfNotExists = async (userId: string, currentDate: Date) => {
-
+export const getOrCreatePayPeriodIfNotExists = async (
+    userId: string,
+    currentDate: Date,
+) => {
     const existingPayPeriod = await dbSingleton.payPeriod.findFirst({
         where: {
             userId,
@@ -64,7 +67,7 @@ export const getOrCreatePayPeriodIfNotExists = async (userId: string, currentDat
     const foundPayPeriodId = existingPayPeriod?.payPeriodId;
 
     if (!foundPayPeriodId) {
-        const {startDate, endDate} = checkPayPeriodRange(currentDate);
+        const { startDate, endDate } = checkPayPeriodRange(currentDate);
         const newPayPeriod = await dbSingleton.payPeriod.create({
             data: {
                 userId,
@@ -72,42 +75,47 @@ export const getOrCreatePayPeriodIfNotExists = async (userId: string, currentDat
                 endDate,
                 totalHours: 0,
                 grossPay: 0,
-                status: 'PENDING',
+                status: "PENDING",
             },
         });
-        return newPayPeriod.payPeriodId
-    }
-    else{
+        return newPayPeriod.payPeriodId;
+    } else {
         return foundPayPeriodId;
     }
-}
+};
 
-export const getTimeEntriesByPayPeriodIdAndUserId = async (userId: string, payPeriodId: string) => {
-
+export const getTimeEntriesByPayPeriodIdAndUserId = async (
+    userId: string,
+    payPeriodId: string,
+) => {
     try {
         const timeEntries = await dbSingleton.timeEntry.findMany({
             where: {
                 userId,
                 payPeriodId,
             },
-            orderBy: {clockInTime: 'asc'},
+            orderBy: { clockInTime: "asc" },
         });
 
         if (!timeEntries) {
-            console.error('No time entries found for this pay period and user.');
+            console.error(
+                "No time entries found for this pay period and user.",
+            );
             return [];
         }
         return timeEntries;
-
     } catch (e: unknown) {
         if (e instanceof Error) {
-            console.error('Error fetching time entries:', e.message);
+            console.error("Error fetching time entries:", e.message);
         }
         return [];
     }
-}
+};
 
-export const getPayPeriodByPeriodIdAndUserId = async (payPeriodId: string, userId: string) => {
+export const getPayPeriodByPeriodIdAndUserId = async (
+    payPeriodId: string,
+    userId: string,
+) => {
     try {
         const payPeriod = await dbSingleton.payPeriod.findFirst({
             where: {
@@ -117,46 +125,47 @@ export const getPayPeriodByPeriodIdAndUserId = async (payPeriodId: string, userI
         });
 
         if (!payPeriod) {
-            console.error('No pay period found for this ID and user.');
+            console.error("No pay period found for this ID and user.");
             return null;
         }
-        if(payPeriod.payPeriodId) {
+        if (payPeriod.payPeriodId) {
             return {
                 ...payPeriod,
                 totalHours: payPeriod.totalHours.toNumber(),
                 grossPay: payPeriod.grossPay.toNumber(),
-            }
+            };
         }
     } catch (e: unknown) {
         if (e instanceof Error) {
-            console.error('Error fetching pay period:', e.message);
+            console.error("Error fetching pay period:", e.message);
         }
         return null;
     }
-}
+};
 
-export const getAnyNullTimeEntryClockedInWithUserId = async (userId: string) =>{
-    try{
+export const getAnyNullTimeEntryClockedInWithUserId = async (
+    userId: string,
+) => {
+    try {
         const latestTimeEntry = await dbSingleton.timeEntry.findFirst({
             where: {
                 userId,
                 clockOutTime: null,
             },
             orderBy: {
-                clockInTime: 'desc',
+                clockInTime: "desc",
             },
         });
 
         if (!latestTimeEntry) {
-            console.error('No time entry found for this user.');
+            console.error("No time entry found for this user.");
             return null;
         }
         return latestTimeEntry;
-    }
-    catch(e: unknown) {
+    } catch (e: unknown) {
         if (e instanceof Error) {
-            console.error('Error fetching latest time entry:', e.message);
+            console.error("Error fetching latest time entry:", e.message);
         }
         return null;
     }
-}
+};

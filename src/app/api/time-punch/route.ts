@@ -6,11 +6,11 @@ export async function POST(request: Request) {
 
     try{
         const requestBody = await request.json();
-        const { userId, timestamp, type } = requestBody;
+        const {userId, timestamp, type} = requestBody;
 
         if (!userId || !timestamp || !type) {
             return NextResponse.json(
-                { message: "Missing required fields", status: 400 },
+                {message: "Missing required fields", status: 400},
             );
         }
 

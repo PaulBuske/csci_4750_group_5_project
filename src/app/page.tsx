@@ -1,16 +1,15 @@
-import {Box, Button, Typography} from '@mui/material';
+import { Box, Button, Typography } from "@mui/material";
 import React from "react";
 import NextLink from "next/link";
 
 export default function Home() {
-
     return (
         <Box
-            display='flex'
-            flexDirection='column'
-            alignItems='center'
-            justifyContent='center'
-            height='100vh'
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            height="100vh"
         >
             <Typography variant="h2" component="h1" gutterBottom>
                 CSCI 4750 Group 5 Project

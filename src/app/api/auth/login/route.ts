@@ -1,8 +1,8 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import {cookies} from "next/headers";
-import {encrypt} from "@/app/lib/sessions.ts";
-import {dbSingleton} from "@/app/lib/dbSingleton.ts";
+import { cookies } from "next/headers";
+import { encrypt } from "@/app/lib/sessions.ts";
+import { dbSingleton } from "@/app/lib/dbSingleton.ts";
 
 export async function POST(request: Request) {
     try {
@@ -10,7 +10,8 @@ export async function POST(request: Request) {
 
         if (!email || !password) {
             return NextResponse.json(
-                { message: "Email and password are required"}, {status: 400 }
+                { message: "Email and password are required" },
+                { status: 400 },
             );
         }
 
@@ -20,7 +21,8 @@ export async function POST(request: Request) {
 
         if (!user) {
             return NextResponse.json(
-                { message: "Invalid email or password"}, {status: 401 }
+                { message: "Invalid email or password" },
+                { status: 401 },
             );
         }
 
@@ -28,7 +30,8 @@ export async function POST(request: Request) {
 
         if (!passwordMatch) {
             return NextResponse.json(
-                { message: "Invalid password"}, {status: 401 }
+                { message: "Invalid password" },
+                { status: 401 },
             );
         }
 
@@ -50,7 +53,7 @@ export async function POST(request: Request) {
         const cookieStore = await cookies();
         cookieStore.set("session", encryptedSession, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === "production",
             expires: expiresAt,
             sameSite: "lax",
             path: "/",
@@ -67,7 +70,8 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error("Login error:", error);
         return NextResponse.json(
-            { message: "Internal server error"}, {status: 500 }
+            { message: "Internal server error" },
+            { status: 500 },
         );
     }
 }

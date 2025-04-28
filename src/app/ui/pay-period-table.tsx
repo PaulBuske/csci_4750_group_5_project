@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect} from "react";
+import { useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,17 +7,22 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import {PayPeriod, ProjectUser, TimeEntry, TimeEntryRow,} from "@/app/types/project-types.ts";
-import {Box, CircularProgress, Stack, Typography} from "@mui/material";
+import {
+    PayPeriod,
+    ProjectUser,
+    TimeEntry,
+    TimeEntryRow,
+} from "@/app/types/project-types.ts";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import {
     getOrCreatePayPeriodIfNotExists,
     getPayPeriodByPeriodIdAndUserId,
     getTimeEntriesByPayPeriodIdAndUserId,
 } from "@/app/lib/data-access-layer.ts";
-import {DatePicker} from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
-import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import DeleteRowModalButton from "@/app/ui/delete-time-entry-row-modal-button.tsx";
 
 const TAX_RATE = 0.12;
@@ -53,7 +58,7 @@ const createTimeEntryRows = (
             clockInTime: clockIn,
             clockOutTime: clockOut,
             hoursWorked,
-            earned
+            earned,
         };
     });
 };
@@ -93,7 +98,7 @@ const PayPeriodTable = (
     const [loading, setLoading] = React.useState<boolean>(true);
 
     useEffect(() => {
-        setLoading(true)
+        setLoading(true);
         const fetchTimeEntriesForPayPeriod = async (
             userId: string,
             payPeriodLookup: Date,
@@ -118,7 +123,6 @@ const PayPeriodTable = (
                 }
                 setCurrentPayPeriod(payPeriod);
 
-                // Get time entries
                 const timeEntries = await getTimeEntriesByPayPeriodIdAndUserId(
                     userId,
                     payPeriodId,
@@ -131,7 +135,7 @@ const PayPeriodTable = (
                     return;
                 }
                 setDisplayedTimeEntries(timeEntries as TimeEntry[]);
-                setErrorMessage(null)
+                setErrorMessage(null);
             } catch (e: unknown) {
                 if (e instanceof Error) {
                     setErrorMessage(e.message);
@@ -150,10 +154,16 @@ const PayPeriodTable = (
                 .then();
         }
         setLoading(false);
-    }, [currentUser, payPeriodLookup, refreshTrigger, setErrorMessage, loading]);
+    }, [
+        currentUser,
+        payPeriodLookup,
+        refreshTrigger,
+        setErrorMessage,
+        loading,
+    ]);
 
     useEffect(() => {
-        setLoading(true)
+        setLoading(true);
         if (displayedTimeEntries.length > 0 && currentUser) {
             const newTimeEntryRows = createTimeEntryRows(
                 displayedTimeEntries,
@@ -175,7 +185,13 @@ const PayPeriodTable = (
             setPayStubNetPay(0);
         }
         setLoading(false);
-    }, [displayedTimeEntries, currentUser, refreshTrigger, setErrorMessage, loading]);
+    }, [
+        displayedTimeEntries,
+        currentUser,
+        refreshTrigger,
+        setErrorMessage,
+        loading,
+    ]);
 
     return (
         <Box>
@@ -220,7 +236,7 @@ const PayPeriodTable = (
                                     <TableCell align="right">
                                         Total Pay
                                     </TableCell>
-                                    <TableCell/>
+                                    <TableCell />
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Date</TableCell>
@@ -232,7 +248,7 @@ const PayPeriodTable = (
                                         Hours Worked
                                     </TableCell>
                                     <TableCell align="right">Earned</TableCell>
-                                    <TableCell/>
+                                    <TableCell />
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -253,7 +269,9 @@ const PayPeriodTable = (
                                                 ?.toLocaleTimeString()}
                                         </TableCell>
                                         <TableCell align="right">
-                                            {ccyFormat(timeEntryRow.hoursWorked)}
+                                            {ccyFormat(
+                                                timeEntryRow.hoursWorked,
+                                            )}
                                         </TableCell>
                                         <TableCell align="right">
                                             {ccyFormat(timeEntryRow.earned)}
@@ -293,7 +311,7 @@ const PayPeriodTable = (
                     </TableContainer>
                 )}
         </Box>
-    )
+    );
 };
 
 export default PayPeriodTable;

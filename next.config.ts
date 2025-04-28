@@ -6,7 +6,6 @@ const nextConfig: import('next').NextConfig = {
         tsconfigPath: './tsconfig.json',
     },
     webpack: (config) => {
-        // Allow importing .ts files with the extension specified
         config.resolve.extensionAlias = {
             '.js': ['.js', '.ts', '.tsx'],
             '.jsx': ['.jsx', '.tsx'],
