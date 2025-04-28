@@ -1,4 +1,4 @@
-import {PayStatus, UserRole} from "@prisma/client";
+import { PayStatus, UserRole } from "@prisma/client";
 
 export type ValidSession = {
     isAuth: boolean;

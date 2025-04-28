@@ -8,7 +8,7 @@ export async function GET() {
     const session = await verifySession()
 
     if (!session) {
-        return new Response(null, { status: 401 })
+        return new Response(null, {status: 401})
     }
 
     try {

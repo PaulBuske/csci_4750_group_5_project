@@ -22,7 +22,7 @@ type ResetPasswordModalProps = {
     setErrorState: React.Dispatch<React.SetStateAction<boolean>>;
     setErrorMessage?: (value: ((prevState: string) => string) | string) => void;
     setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
-}
+};
 
 const ResetPasswordModal = ({
     open,
@@ -37,13 +37,11 @@ const ResetPasswordModal = ({
     const [passwordError, setPasswordError] = useState("");
 
     const validatePassword = () => {
-        // Password must be at least 12 characters long
         if (password.length < 12) {
             setPasswordError("Password must be at least 12 characters long");
             return false;
         }
 
-        // Password must contain at least one uppercase letter
         if (!/[A-Z]/.test(password)) {
             setPasswordError(
                 "Password must contain at least one uppercase letter",
@@ -51,7 +49,6 @@ const ResetPasswordModal = ({
             return false;
         }
 
-        // Password must contain at least one lowercase letter
         if (!/[a-z]/.test(password)) {
             setPasswordError(
                 "Password must contain at least one lowercase letter",
@@ -59,13 +56,11 @@ const ResetPasswordModal = ({
             return false;
         }
 
-        // Password must contain at least one number
         if (!/\d/.test(password)) {
             setPasswordError("Password must contain at least one number");
             return false;
         }
 
-        // Password must contain at least one special character
         if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
             setPasswordError(
                 "Password must contain at least one special character",
@@ -73,7 +68,6 @@ const ResetPasswordModal = ({
             return false;
         }
 
-        // Check if passwords match
         if (password !== confirmPassword) {
             setPasswordError("Passwords do not match");
             return false;

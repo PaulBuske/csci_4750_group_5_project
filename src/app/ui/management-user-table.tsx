@@ -7,19 +7,18 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import type { ProjectUser } from "../types/project-types.ts";
-// Correct the import here
+
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { formatDate } from "@/app/helper-functions.ts"; // Assuming you have this helper
+import { formatDate } from "@/app/helper-functions.ts";
 import { Button } from "@mui/material";
 
-// Fields to exclude from the table
 const EXCLUDED_FIELDS = [
     "password",
     "resetToken",
     "resetTokenExpiresAt",
     "role",
     "createdAt",
-    "updatedAt"
+    "updatedAt",
 ];
 
 const FIELD_LABELS: Record<string, string> = {
@@ -31,9 +30,7 @@ const FIELD_LABELS: Record<string, string> = {
     updatedAt: "Updated",
 };
 
-// Function to generate columns dynamically
 const generateColumns = (user: ProjectUser): GridColDef[] => {
-    // Filter out excluded fields AND empty string keys
     const validKeys = Object.keys(user)
         .filter((key) => key.trim() !== "" && !EXCLUDED_FIELDS.includes(key));
 
@@ -41,12 +38,11 @@ const generateColumns = (user: ProjectUser): GridColDef[] => {
         const columnDef: GridColDef = {
             field: key,
             headerName: FIELD_LABELS[key] ||
-                key.charAt(0).toUpperCase() + key.slice(1), // Use label or capitalize key
-            width: 150, // Default width, adjust as needed
+                key.charAt(0).toUpperCase() + key.slice(1),
+            width: 150,
             sortable: true,
         };
 
-        // Customize specific columns
         if (key === "userId") {
             columnDef.width = 90;
         } else if (key === "email") {
@@ -55,7 +51,7 @@ const generateColumns = (user: ProjectUser): GridColDef[] => {
             columnDef.width = 100;
         } else if (key === "createdAt" || key === "updatedAt") {
             columnDef.width = 180;
-            // Use GridValueGetter type
+
             columnDef.valueGetter = (value: unknown) =>
                 value ? formatDate(value.toString()) : "N/A";
         }
@@ -71,7 +67,7 @@ const ManagementUserTable = () => {
     const [errorState, setErrorState] = useState<boolean>(false);
     const [isClient, setIsClient] = useState(false);
     const [paginationModel, setPaginationModel] = useState({
-        pageSize: 10, // Default page size
+        pageSize: 10,
         page: 0,
     });
 
@@ -117,7 +113,7 @@ const ManagementUserTable = () => {
     }, []);
 
     if (!isClient) {
-        return null; // Don't render server-side
+        return null;
     }
 
     if (loading) {
@@ -138,7 +134,6 @@ const ManagementUserTable = () => {
     }
 
     if (columns.length === 0 && currentUsers.length > 0) {
-        // Still generating columns or first user had no valid keys
         return (
             <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
                 <CircularProgress />
@@ -167,7 +162,7 @@ const ManagementUserTable = () => {
             display="flex"
             flexDirection="row"
             justifyContent="space-between"
-            width='100%'
+            width="100%"
         >
             <Paper
                 sx={{
@@ -182,10 +177,10 @@ const ManagementUserTable = () => {
                 <DataGrid
                     rows={currentUsers}
                     columns={columns}
-                    getRowId={(row) => row.userId} // Specify the unique ID field
+                    getRowId={(row) => row.userId}
                     paginationModel={paginationModel}
                     onPaginationModelChange={setPaginationModel}
-                    pageSizeOptions={[5, 10, 20, 50]} // Options for page size dropdown
+                    pageSizeOptions={[5, 10, 20, 50]}
                     checkboxSelection
                     disableRowSelectionOnClick
                     sx={{ border: 0 }}
@@ -193,22 +188,20 @@ const ManagementUserTable = () => {
             </Paper>
             <Box
                 component={Paper}
-                display='flex'
-                flexDirection='column'
-                justifyContent='space-around'
-                alignItems='center'
-                width='100%'
-                maxWidth='lg'
+                display="flex"
+                flexDirection="column"
+                justifyContent="space-around"
+                alignItems="center"
+                width="100%"
+                maxWidth="lg"
             >
                 <Typography variant="h6" sx={{ mb: 2 }}>
                     User Management
                 </Typography>
-                <Button variant='contained'
-                        sx={{height: '3rem', mb: 2}}
-                >
+                <Button variant="contained" sx={{ height: "3rem", mb: 2 }}>
                     Edit Hourly Rate
                 </Button>
-                <Button variant='contained'>
+                <Button variant="contained">
                     View User Pay Stubs
                 </Button>
             </Box>

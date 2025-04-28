@@ -37,7 +37,7 @@ type AddUserModalProps = {
 
 const AddUserModal = (
     { open, onClose, setErrorState, setErrorMessage, setLoading }:
-    AddUserModalProps,
+        AddUserModalProps,
 ) => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");

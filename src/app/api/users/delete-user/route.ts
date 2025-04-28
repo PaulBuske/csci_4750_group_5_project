@@ -44,7 +44,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Prevent admin from deleting themselves
         if (userIds.includes(authenticatedUser.userId)) {
             return NextResponse.json(
                 {
@@ -54,7 +53,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Delete users in a transaction to ensure atomicity
         const deletedUsers = await dbSingleton.$transaction(
             userIds.map((userId) =>
                 dbSingleton.user.delete({

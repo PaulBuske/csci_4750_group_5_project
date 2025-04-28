@@ -1,5 +1,5 @@
-import {dbSingleton} from "@/app/lib/dbSingleton.ts";
-import {NextResponse} from "next/server";
+import { dbSingleton } from "@/app/lib/dbSingleton.ts";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
     try {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
                 email: email,
                 password: password,
                 role: role,
-                createdAt: currentDate
+                createdAt: currentDate,
             },
             select: {
                 userId: true,
@@ -34,8 +34,7 @@ export async function POST(request: Request) {
         return NextResponse.json(
             { message: "User added", status: 200, addedUser: addUser },
         );
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error during add user:", error);
         return NextResponse.json(
             { message: "Internal server error", status: 500 },

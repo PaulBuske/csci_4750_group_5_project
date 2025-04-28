@@ -7,7 +7,12 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import type { ProjectUser } from "../types/project-types.ts";
-import {DataGrid, GridColDef, GridRowSelectionModel, type GridRowId,} from "@mui/x-data-grid";
+import {
+    DataGrid,
+    GridColDef,
+    type GridRowId,
+    GridRowSelectionModel,
+} from "@mui/x-data-grid";
 import { formatDate } from "@/app/helper-functions.ts";
 import { Alert, Button } from "@mui/material";
 import AddUserModal from "@/app/ui/add-user-modal.tsx";
@@ -24,7 +29,7 @@ const handleDeleteUsers = async (userIds: string[]): Promise<boolean> => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userIds }), // Simplified correct format
+            body: JSON.stringify({ userIds }),
         });
 
         if (!response.ok) {
@@ -104,9 +109,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
         useState("");
     const [resetPasswordWarning, setResetPasswordWarning] = useState("");
 
-
     const handleDeleteSelected = async () => {
-
         if (selectedUsers.length === 0) return;
 
         setLoading(true);
@@ -273,14 +276,24 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     checkboxSelection
                     disableRowSelectionOnClick
                     sx={{ border: 0 }}
-                    onRowSelectionModelChange={(newSelectionModel: GridRowSelectionModel ) => {
-                        const selectedRowIdsSet: Set<GridRowId> = newSelectionModel.ids;
-                        const selectedUserIds = Array.from(selectedRowIdsSet).map((id) => String(id));
-                        setSelectedUsers(selectedUserIds)
+                    onRowSelectionModelChange={(
+                        newSelectionModel: GridRowSelectionModel,
+                    ) => {
+                        const selectedRowIdsSet: Set<GridRowId> =
+                            newSelectionModel.ids;
+                        const selectedUserIds = Array.from(selectedRowIdsSet)
+                            .map((id) => String(id));
+                        setSelectedUsers(selectedUserIds);
 
-                        if(selectedUserIds.includes(String(currentUser.userId))) {
-                            setDeleteUserButtonErrorMessage("Cannot delete yourself");
-                            setResetPasswordWarning("Admins cannot reset their own password.");
+                        if (
+                            selectedUserIds.includes(String(currentUser.userId))
+                        ) {
+                            setDeleteUserButtonErrorMessage(
+                                "Cannot delete yourself",
+                            );
+                            setResetPasswordWarning(
+                                "Admins cannot reset their own password.",
+                            );
                         } else {
                             setDeleteUserButtonErrorMessage("");
                         }
@@ -313,10 +326,8 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     fullWidth={true}
                     sx={{ height: "3rem", mb: 2 }}
                     onClick={handleDeleteSelected}
-                    disabled={
-                        selectedUsers.length === 0 ||
-                        isCurrentUserSelected
-                    }
+                    disabled={selectedUsers.length === 0 ||
+                        isCurrentUserSelected}
                 >
                     Delete Selected ({selectedUsers.length})
                 </Button>
@@ -339,7 +350,6 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                         {resetPasswordWarning}
                     </Alert>
                 )}
-
             </Box>
 
             {addUserModalOpen && (
