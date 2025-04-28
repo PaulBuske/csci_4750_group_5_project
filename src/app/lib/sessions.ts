@@ -1,6 +1,6 @@
-import { type JWTPayload, jwtVerify, SignJWT } from "jose";
-import { cookies } from "next/headers";
-import { dbSingleton } from "@/app/lib/dbSingleton.ts";
+import {type JWTPayload, jwtVerify, SignJWT} from "jose";
+import {cookies} from "next/headers";
+import {dbSingleton} from "@/app/lib/dbSingleton.ts";
 
 const secretKey = new TextEncoder().encode(
     process.env.JWT_SECRET || "fallback_secret_key_at_least_32_chars_long!",

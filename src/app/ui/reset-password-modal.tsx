@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+import React, {useState} from "react";
+import {Box, Button, Modal, TextField, Typography} from "@mui/material";
 
 const style = {
     position: "absolute",

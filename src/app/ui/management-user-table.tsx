@@ -1,16 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import type { ProjectUser } from "../types/project-types.ts";
+import type {ProjectUser} from "../types/project-types.ts";
 
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { formatDate } from "@/app/helper-functions.ts";
-import { Button } from "@mui/material";
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
+import {formatDate} from "@/app/helper-functions.ts";
+import {Button} from "@mui/material";
+import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
 const EXCLUDED_FIELDS = [
     "password",
@@ -118,9 +118,7 @@ const ManagementUserTable = () => {
 
     if (loading) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                <CircularProgress />
-            </Box>
+            <LogoSvgLoadingIcon/>
         );
     }
 
@@ -135,9 +133,7 @@ const ManagementUserTable = () => {
 
     if (columns.length === 0 && currentUsers.length > 0) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                <CircularProgress />
-            </Box>
+            <LogoSvgLoadingIcon/>
         );
     }
 

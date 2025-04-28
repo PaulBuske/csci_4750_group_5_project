@@ -1,6 +1,8 @@
-import { Box, Button, Typography } from "@mui/material";
+import {Box, Button, Typography} from "@mui/material";
 import React from "react";
 import NextLink from "next/link";
+import LogoSvgIcon from "@/app/ui/logo-svg-icon/logo-svg-icon.tsx";
+
 
 export default function Home() {
     return (
@@ -11,14 +13,25 @@ export default function Home() {
             justifyContent="center"
             height="100vh"
         >
-            <Typography variant="h2" component="h1" gutterBottom>
-                CSCI 4750 Group 5 Project
-            </Typography>
-            <Typography variant="h5" component="h2" gutterBottom>
-                Spring 2025
-            </Typography>
+            <Box
+                display="flex"
+                flexDirection="row"
+                alignItems="center"
+                mb={4}
+            >
+                <LogoSvgIcon
+                    sx={{
+                        width: 100,
+                        height: 100,
+                        mr: 2,
+                        color: "primary.main",
+                    }}/>
+                <Typography variant="h2" component="h1">
+                    Time and Expense 2.0
+                </Typography>
+            </Box>
 
-            <Box sx={{ mt: 4 }}>
+            <Box>
                 <Button
                     variant="contained"
                     color="primary"

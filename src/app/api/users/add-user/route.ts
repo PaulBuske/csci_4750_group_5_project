@@ -1,5 +1,5 @@
-import { dbSingleton } from "@/app/lib/dbSingleton.ts";
-import { NextResponse } from "next/server";
+import {dbSingleton} from "@/app/lib/dbSingleton.ts";
+import {NextResponse} from "next/server";
 
 export async function POST(request: Request) {
     try {

@@ -1,7 +1,7 @@
-import { dbSingleton } from "@/app/lib/dbSingleton.ts";
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
-import { decrypt } from "@/app/lib/sessions.ts";
+import {dbSingleton} from "@/app/lib/dbSingleton.ts";
+import {cookies} from "next/headers";
+import {NextResponse} from "next/server";
+import {decrypt} from "@/app/lib/sessions.ts";
 
 export async function POST() {
     try {
