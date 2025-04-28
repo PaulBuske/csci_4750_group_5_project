@@ -1,15 +1,35 @@
 'use client';
 
-import React, {useState} from 'react';
-import {useRouter} from 'next/navigation';
-import {Alert, Avatar, Box, Button, CircularProgress, Container, Paper, TextField, Typography} from '@mui/material';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+    Alert,
+    Avatar,
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    Paper,
+    TextField,
+    Typography,
+    IconButton,
+    InputAdornment
+} from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import UserManualButton from "@/app/ui/user-manual-button.tsx";
 
 export default function LoginForm() {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -45,7 +65,6 @@ export default function LoginForm() {
         }
     }
     return (
-        // Using 'xs' maxWidth to constrain overall form width
         <Container component="main" maxWidth="xs">
             <Paper
                 elevation={3}
@@ -92,28 +111,39 @@ export default function LoginForm() {
                         fullWidth
                         name="password"
                         label="Password"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         id="password"
                         autoComplete="current-password"
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                     />
-                    {/* Buttons container - centers the buttons */}
                     <Box
                         display='flex'
                         flexDirection='column'
-                        alignItems='center' // Center items horizontally
+                        alignItems='center'
                         justifyContent='center'
                         sx={{ width: '100%', mt: 1 }}
                     >
                         <Button
                             type="submit"
                             variant="contained"
-                            // Removed fullWidth
-                            sx={{ mt: 3, mb: 2, width: '100%', maxWidth: '300px' }} // Add maxWidth
+                            sx={{ mt: 3, mb: 2, width: '100%', maxWidth: '300px' }}
                             disabled={loading}
                         >
                             {loading ? <CircularProgress size={24} /> : 'Log In'}
                         </Button>
-                        {/* UserManualButton uses its own defined style */}
                         <UserManualButton loading={loading} />
                     </Box>
                 </Box>

@@ -27,10 +27,9 @@ export async function decrypt(token: string | undefined) {
 }
 
 export async function createSession(userId: string) {
-    // Set the expiration time to 15 minutes from now
+
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    // 1. Create a session in the database
     const session = await dbSingleton.session.create({
         data: {
             userId: userId,
@@ -40,10 +39,8 @@ export async function createSession(userId: string) {
 
     const sessionId = session.sessionId;
 
-    // 2. Encrypt the session ID
     const encryptedSession = await encrypt({ sessionId, userId, expiresAt });
 
-    // 3. Store the session in cookies for optimistic auth checks
     const cookieStore = cookies();
     (await cookieStore).set('session', encryptedSession, {
       httpOnly: true,
