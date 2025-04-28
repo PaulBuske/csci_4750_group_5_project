@@ -8,37 +8,32 @@ export async function POST(request: Request) {
     try {
         const { email, password } = await request.json();
 
-        // Validate input
         if (!email || !password) {
             return NextResponse.json(
-                { message: "Email and password are required", status: 400 },
+                { message: "Email and password are required"}, {status: 400 }
             );
         }
 
-        // Find user by email
         const user = await dbSingleton.user.findUnique({
             where: { email },
         });
 
         if (!user) {
             return NextResponse.json(
-                { message: "Invalid email or password", status: 401 },
+                { message: "Invalid email or password"}, {status: 401 }
             );
         }
 
-        // Verify password
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
             return NextResponse.json(
-                { message: "Invalid email or password", status: 401 },
+                { message: "Invalid password"}, {status: 401 }
             );
         }
 
-        // Set the expiration time to 15 minutes from now
         const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-        // Create a session in the database
         const session = await dbSingleton.session.create({
             data: {
                 userId: user.userId,
@@ -46,14 +41,12 @@ export async function POST(request: Request) {
             },
         });
 
-        // Encrypt the session data
         const encryptedSession = await encrypt({
             sessionId: session.sessionId,
             userId: user.userId,
             expiresAt: expiresAt.toISOString(),
         });
 
-        // Set the session cookie
         const cookieStore = await cookies();
         cookieStore.set("session", encryptedSession, {
             httpOnly: true,
@@ -74,7 +67,7 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error("Login error:", error);
         return NextResponse.json(
-            { message: "Internal server error", status: 500 },
+            { message: "Internal server error"}, {status: 500 }
         );
     }
 }
