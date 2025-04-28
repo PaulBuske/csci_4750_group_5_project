@@ -1,15 +1,15 @@
 "use client";
 
 import * as React from "react";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import type {ProjectUser} from "../types/project-types.ts";
-import {DataGrid, GridColDef} from "@mui/x-data-grid";
-import {formatDate} from "@/app/helper-functions.ts";
-import {Button} from "@mui/material";
+import type { ProjectUser } from "../types/project-types.ts";
+import {DataGrid, GridColDef, GridRowSelectionModel, type GridRowId,} from "@mui/x-data-grid";
+import { formatDate } from "@/app/helper-functions.ts";
+import { Alert, Button } from "@mui/material";
 import AddUserModal from "@/app/ui/add-user-modal.tsx";
 import ResetPasswordModal from "@/app/ui/reset-password-modal.tsx";
 
@@ -17,14 +17,14 @@ interface AdminUserTableProps {
     currentUser: ProjectUser;
 }
 
-const handleDeleteUsers = async (userIds: string[]) => {
+const handleDeleteUsers = async (userIds: string[]): Promise<boolean> => {
     try {
         const response = await fetch("/api/users/delete-user", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ userIds }),
+            body: JSON.stringify({ userIds }), // Simplified correct format
         });
 
         if (!response.ok) {
@@ -33,12 +33,19 @@ const handleDeleteUsers = async (userIds: string[]) => {
 
         const data = await response.json();
         console.log(data.message);
+        return true;
     } catch (error) {
         console.error("Error deleting users:", error);
+        return false;
     }
-}
+};
 
-const EXCLUDED_FIELDS = ["password", "resetToken", "resetTokenExpiresAt", "hourlyRate"];
+const EXCLUDED_FIELDS = [
+    "password",
+    "resetToken",
+    "resetTokenExpiresAt",
+    "hourlyRate",
+];
 
 const FIELD_LABELS: Record<string, string> = {
     userId: "User ID",
@@ -51,13 +58,14 @@ const FIELD_LABELS: Record<string, string> = {
 
 const generateColumns = (user: ProjectUser): GridColDef[] => {
     const validKeys = Object.keys(user).filter(
-        (key) => key.trim() !== "" && !EXCLUDED_FIELDS.includes(key)
+        (key) => key.trim() !== "" && !EXCLUDED_FIELDS.includes(key),
     );
 
     return validKeys.map((key): GridColDef => {
         const columnDef: GridColDef = {
             field: key,
-            headerName: FIELD_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1),
+            headerName: FIELD_LABELS[key] ||
+                key.charAt(0).toUpperCase() + key.slice(1),
             width: 150,
             sortable: true,
         };
@@ -92,43 +100,58 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     const [errorMessage, setErrorMessage] = useState("");
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
+    const [deleteUserButtonErrorMessage, setDeleteUserButtonErrorMessage] =
+        useState("");
+    const [resetPasswordWarning, setResetPasswordWarning] = useState("");
+
 
     const handleDeleteSelected = async () => {
-        if (selectedUsers.length === 0) {
-            setErrorState(true);
-            setErrorMessage("No users selected");
-            return;
-        }
+
+        if (selectedUsers.length === 0) return;
 
         setLoading(true);
+        setErrorState(false);
+        setErrorMessage("");
+
         try {
-            await handleDeleteUsers(selectedUsers);
-            // Refresh the user list after deletion
-            const response = await fetch("/api/users");
-            const data = await response.json();
-            if (data.users && data.users.length > 0) {
-                setCurrentUsers(data.users.map((user: ProjectUser) => ({ ...user })));
+            const success = await handleDeleteUsers(selectedUsers);
+            if (success) {
+                const response = await fetch("/api/users");
+                const data = await response.json();
+                if (data.users && data.users.length > 0) {
+                    setCurrentUsers(
+                        data.users.map((user: ProjectUser) => ({ ...user })),
+                    );
+                } else {
+                    setCurrentUsers([]);
+                }
+                setSelectedUsers([]);
+                setDeleteUserButtonErrorMessage("");
             } else {
-                setCurrentUsers([]);
+                setErrorState(true);
+                setErrorMessage("Failed to delete selected users.");
             }
-            setSelectedUsers([]);
         } catch (error) {
             setErrorState(true);
-            setErrorMessage("Failed to delete users");
+            setErrorMessage("An error occurred while deleting users.");
             console.error("Error deleting users:", error);
         } finally {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         setIsClient(true);
 
         const fetchUsers = async () => {
             setErrorState(false);
+            setErrorMessage("");
             try {
                 const response = await fetch("/api/users");
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch users: ${response.status}`);
+                    throw new Error(
+                        `Failed to fetch users: ${response.status}`,
+                    );
                 }
                 const data = await response.json();
                 if (data.users && data.users.length > 0) {
@@ -146,13 +169,16 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             } catch (error: unknown) {
                 if (error instanceof Error) {
                     console.error("Error fetching users:", error.message);
+                    setErrorMessage(
+                        `Error fetching users: ${error.message}. Please try again.`,
+                    );
                 } else {
                     console.error("Unexpected error fetching users:", error);
+                    setErrorMessage(
+                        "An unexpected error occurred while fetching users. Please try again.",
+                    );
                 }
                 setErrorState(true);
-                setErrorMessage(
-                    "An error occurred while fetching users. Please try again."
-                );
                 setCurrentUsers([]);
                 setColumns([]);
             } finally {
@@ -163,29 +189,13 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
         if (loading) {
             fetchUsers();
         }
-    }, [loading]);
+    }, [loading, columns.length, selectedUsers]);
 
     if (!isClient) {
         return null;
     }
 
-    if (loading) {
-        return (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                <CircularProgress />
-            </Box>
-        );
-    }
-
-    if (errorState) {
-        return (
-            <Paper sx={{ p: 2, textAlign: "center", color: "error.main" }}>
-                <Typography variant="h6">{errorMessage}</Typography>
-            </Paper>
-        );
-    }
-
-    if (columns.length === 0 && currentUsers.length > 0) {
+    if (loading || (columns.length === 0 && currentUsers.length > 0)) {
         return (
             <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
                 <CircularProgress />
@@ -202,26 +212,52 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    flexDirection: "column",
+                    p: 2,
                 }}
             >
-                <Typography>No users found</Typography>
+                <Typography sx={{ mb: 2 }}>No users found</Typography>
+                <Button
+                    variant="contained"
+                    onClick={() => setAddUserModalOpen(true)}
+                >
+                    Add New User
+                </Button>
+                {addUserModalOpen && (
+                    <AddUserModal
+                        open={addUserModalOpen}
+                        onClose={() => setAddUserModalOpen(false)}
+                        setErrorState={setErrorState}
+                        setErrorMessage={setErrorMessage}
+                        setLoading={setLoading}
+                    />
+                )}
             </Paper>
         );
     }
-    const isCurrentUserSelected = Array.isArray(selectedUsers) &&
-        selectedUsers.some(id => String(id) === String(currentUser.userId));
 
+    const isCurrentUserSelected = selectedUsers.includes(currentUser.userId);
 
-    const canResetPassword = selectedUsers.length === 1 && !isCurrentUserSelected;
-
+    const canResetPassword = selectedUsers.length === 1 &&
+        !isCurrentUserSelected;
 
     return (
-        <Box display="flex" flexDirection="row" justifyContent="space-between" width="100%">
+        <Box
+            display="flex"
+            flexDirection={{ xs: "column", md: "row" }}
+            justifyContent="space-between"
+            width="100%"
+            gap={2}
+        >
+            {errorState && (
+                <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
+                    {errorMessage}
+                </Alert>
+            )}
             <Paper
                 sx={{
                     height: "auto",
-                    width: "min-content",
-                    maxWidth: "lg",
+                    width: { xs: "100%", md: "70%" },
                     p: 2,
                     display: "flex",
                     flexDirection: "column",
@@ -237,11 +273,17 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     checkboxSelection
                     disableRowSelectionOnClick
                     sx={{ border: 0 }}
-                    onRowSelectionModelChange={(newSelection) => {
-                        const selectionArray = Array.isArray(newSelection)
-                            ? newSelection
-                            : (newSelection ? [newSelection] : []);
-                        setSelectedUsers(selectionArray as string[]);
+                    onRowSelectionModelChange={(newSelectionModel: GridRowSelectionModel ) => {
+                        const selectedRowIdsSet: Set<GridRowId> = newSelectionModel.ids;
+                        const selectedUserIds = Array.from(selectedRowIdsSet).map((id) => String(id));
+                        setSelectedUsers(selectedUserIds)
+
+                        if(selectedUserIds.includes(String(currentUser.userId))) {
+                            setDeleteUserButtonErrorMessage("Cannot delete yourself");
+                            setResetPasswordWarning("Admins cannot reset their own password.");
+                        } else {
+                            setDeleteUserButtonErrorMessage("");
+                        }
                     }}
                 />
             </Paper>
@@ -267,27 +309,39 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                 </Button>
                 <Button
                     variant="contained"
+                    color="error"
                     fullWidth={true}
                     sx={{ height: "3rem", mb: 2 }}
                     onClick={handleDeleteSelected}
-                    disabled={selectedUsers.length === 0 || isCurrentUserSelected}
+                    disabled={
+                        selectedUsers.length === 0 ||
+                        isCurrentUserSelected
+                    }
                 >
-                    Delete Selected Users ({selectedUsers.length})
-                    {isCurrentUserSelected && " (Cannot delete yourself)"}
+                    Delete Selected ({selectedUsers.length})
                 </Button>
+                {isCurrentUserSelected && (
+                    <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
+                        {deleteUserButtonErrorMessage}
+                    </Alert>
+                )}
                 <Button
                     variant="contained"
                     fullWidth={true}
                     sx={{ height: "3rem", mb: 2 }}
                     onClick={() => setResetPasswordModalOpen(true)}
-                    disabled={!canResetPassword}
+                    disabled={!canResetPassword || isCurrentUserSelected}
                 >
                     Reset User Password
-                    {selectedUsers.length > 1 && " (Select only one user)"}
-                    {selectedUsers.length === 0 && " (Select a user)"}
-                    {isCurrentUserSelected && " (Cannot reset your own password)"}
                 </Button>
+                {isCurrentUserSelected && (
+                    <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
+                        {resetPasswordWarning}
+                    </Alert>
+                )}
+
             </Box>
+
             {addUserModalOpen && (
                 <AddUserModal
                     open={addUserModalOpen}
@@ -300,7 +354,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             {resetPasswordModalOpen && (
                 <ResetPasswordModal
                     open={resetPasswordModalOpen}
-                    userIds={selectedUsers}
+                    userIdToReset={selectedUsers[0]}
                     onClose={() => setResetPasswordModalOpen(false)}
                     setErrorState={setErrorState}
                     setErrorMessage={setErrorMessage}

@@ -81,7 +81,7 @@ const AddUserModal = (
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({
                     message: `HTTP error ${response.status}`,
-                })); // Attempt to parse error
+                }));
                 setErrorState(true);
                 if (setErrorMessage) {
                     setErrorMessage(
@@ -128,7 +128,7 @@ const AddUserModal = (
                 </Typography>
                 <TextField
                     fullWidth
-                    required // Mark as required
+                    required
                     label="Name"
                     placeholder="Enter user name"
                     margin="normal"
@@ -137,17 +137,17 @@ const AddUserModal = (
                 />
                 <TextField
                     fullWidth
-                    required // Mark as required
+                    required
                     label="Email"
                     placeholder="Enter user email"
                     margin="normal"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    type="email" // Use email type for basic browser validation
+                    type="email"
                 />
                 <TextField
                     fullWidth
-                    required // Mark as required
+                    required
                     type="password"
                     label="Password"
                     placeholder="Enter user password"
