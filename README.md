@@ -145,8 +145,3 @@ To inspect you database with Prisma Studo:
 - **Role**: Code formatter
 - **Usage**: Ensuring consistent code style across the project
 - **Docs**: [Prettier Documentation](https://prettier.io/docs/en/index.html)
-
-## Zod
-- **Role**: TypeScript-first schema declaration and validation library
-- **Usage**: Validating and parsing data, especially for API requests and responses
-- **Docs**: [Zod Documentation](https://zod.dev/)
