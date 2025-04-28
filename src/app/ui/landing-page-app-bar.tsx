@@ -9,9 +9,9 @@ import Container from "@mui/material/Container";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-import PunchClockIcon from "@mui/icons-material/PunchClock";
-import type { ProjectUser } from "@/app/types/project-types.ts";
-import { useRouter } from "next/navigation";
+import type {ProjectUser} from "@/app/types/project-types.ts";
+import {useRouter} from "next/navigation";
+import LogoSvgIcon from "@/app/ui/logo-svg-icon/logo-svg-icon.tsx";
 
 const settings = ["Logout"];
 
@@ -62,7 +62,14 @@ const LandingPageAppBar = ({ currentUser }: LandingPageAppBarProps) => {
                     sx={{ justifyContent: "space-between" }}
                 >
                     <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <PunchClockIcon sx={{ mr: 1 }} />
+                        <LogoSvgIcon
+                        sx={{
+                            width: 50,
+                            height: 50,
+                            mr: 2,
+                            color: "inherit",
+                        }}
+                        />
                         <Typography
                             variant="h6"
                             noWrap
@@ -74,7 +81,7 @@ const LandingPageAppBar = ({ currentUser }: LandingPageAppBarProps) => {
                                 color: "inherit",
                             }}
                         >
-                            CSCI 4750 Group 5 Project Name: TBD
+                            Time and Expense 2.0
                         </Typography>
                     </Box>
 

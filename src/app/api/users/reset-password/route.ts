@@ -1,7 +1,7 @@
-import { dbSingleton } from "@/app/lib/dbSingleton.ts";
-import { NextResponse } from "next/server";
+import {dbSingleton} from "@/app/lib/dbSingleton.ts";
+import {NextResponse} from "next/server";
 import bcrypt from "bcrypt";
-import { verifySession } from "@/app/lib/data-access-layer.ts";
+import {verifySession} from "@/app/lib/data-access-layer.ts";
 
 export async function POST(request: Request) {
     const session = await verifySession();

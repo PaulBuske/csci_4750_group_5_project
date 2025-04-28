@@ -1,24 +1,13 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-    Alert,
-    Avatar,
-    Box,
-    Button,
-    CircularProgress,
-    Container,
-    Paper,
-    TextField,
-    Typography,
-    IconButton,
-    InputAdornment
-} from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import React, {useState} from "react";
+import {useRouter} from "next/navigation";
+import {Alert, Box, Button, Container, IconButton, InputAdornment, Paper, TextField, Typography,} from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import UserManualButton from "@/app/ui/user-manual-button.tsx";
+import LogoSvgIcon from "@/app/ui/logo-svg-icon/logo-svg-icon.tsx";
+import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
 export default function LoginForm() {
     const router = useRouter();
@@ -27,7 +16,9 @@ export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
-    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleMouseDownPassword = (
+        event: React.MouseEvent<HTMLButtonElement>,
+    ) => {
         event.preventDefault();
     };
 
@@ -37,29 +28,33 @@ export default function LoginForm() {
         setLoading(true);
 
         const formData = new FormData(event.currentTarget);
-        const email = formData.get('email') as string;
-        const password = formData.get('password') as string;
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
 
         try {
-            const response = await fetch('/api/auth/login', {
-                method: 'POST',
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ email, password }),
             });
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.message || 'Failed to login');
+                setError(data.message || "Failed to login");
                 return;
             }
 
-            router.push('/dashboard');
+            router.push("/dashboard");
             router.refresh();
         } catch (error) {
-            console.error('Login failed:', error);
-            setError(error instanceof Error ? error.message : 'Invalid email or password');
+            console.error("Login failed:", error);
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Invalid email or password",
+            );
         } finally {
             setLoading(false);
         }
@@ -71,20 +66,26 @@ export default function LoginForm() {
                 sx={{
                     marginTop: 8,
                     padding: 4,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-                    <LockOutlinedIcon />
-                </Avatar>
+                <LogoSvgIcon
+                    sx={{
+                        width: 75,
+                        height: 75,
+                        mr: 2,
+                        color: "primary.main",
+                    }}
+                />
                 <Typography component="h1" variant="h5">
                     Log In
                 </Typography>
 
                 {error && (
-                    <Alert severity="error" sx={{width: '100%', mt: 2}}>
+                    <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
                         {error}
                     </Alert>
                 )}
@@ -93,7 +94,7 @@ export default function LoginForm() {
                     component="form"
                     onSubmit={handleSubmit}
                     noValidate
-                    sx={{ mt: 1, width: '100%' }}
+                    sx={{ mt: 1, width: "100%" }}
                 >
                     <TextField
                         margin="normal"
@@ -111,7 +112,7 @@ export default function LoginForm() {
                         fullWidth
                         name="password"
                         label="Password"
-                        type={showPassword ? 'text' : 'password'}
+                        type={showPassword ? "text" : "password"}
                         id="password"
                         autoComplete="current-password"
                         InputProps={{
@@ -123,26 +124,35 @@ export default function LoginForm() {
                                         onMouseDown={handleMouseDownPassword}
                                         edge="end"
                                     >
-                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        {showPassword
+                                            ? <VisibilityOff />
+                                            : <Visibility />}
                                     </IconButton>
                                 </InputAdornment>
                             ),
                         }}
                     />
                     <Box
-                        display='flex'
-                        flexDirection='column'
-                        alignItems='center'
-                        justifyContent='center'
-                        sx={{ width: '100%', mt: 1 }}
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                        justifyContent="center"
+                        sx={{ width: "100%", mt: 1 }}
                     >
                         <Button
                             type="submit"
                             variant="contained"
-                            sx={{ mt: 3, mb: 2, width: '100%', maxWidth: '300px' }}
+                            sx={{
+                                mt: 3,
+                                mb: 2,
+                                width: "100%",
+                                maxWidth: "300px",
+                            }}
                             disabled={loading}
                         >
-                            {loading ? <CircularProgress size={24} /> : 'Log In'}
+                            {loading
+                                ? <LogoSvgLoadingIcon/>
+                                : "Log In"}
                         </Button>
                         <UserManualButton loading={loading} />
                     </Box>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type {Metadata} from "next";
 import React from "react";
 import "@/app/globals.css";
 import ThemeRegistry from "@/app/theme-registry.tsx";

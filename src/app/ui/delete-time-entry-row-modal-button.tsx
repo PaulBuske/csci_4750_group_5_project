@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import CheckIcon from "@mui/icons-material/Check";
 import Cancel from "@mui/icons-material/Cancel";
-import { TimeEntryRow } from "@/app/types/project-types.ts";
+import {TimeEntryRow} from "@/app/types/project-types.ts";
 
 const style = {
     position: "absolute",

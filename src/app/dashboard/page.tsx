@@ -1,15 +1,16 @@
 "use client";
 
-import { getUser, verifySession } from "@/app/lib/data-access-layer.ts";
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
-import React, { useCallback, useEffect } from "react";
-import { ProjectUser, ValidSession } from "@/app/types/project-types.ts";
+import {getUser, verifySession} from "@/app/lib/data-access-layer.ts";
+import {Alert, Box, Stack, Typography} from "@mui/material";
+import React, {useCallback, useEffect} from "react";
+import {ProjectUser, ValidSession} from "@/app/types/project-types.ts";
 import LandingPageAppBar from "@/app/ui/landing-page-app-bar.tsx";
 import TimePunchModal from "@/app/ui/time-punch-modal.tsx";
 import PayPeriodTable from "@/app/ui/pay-period-table.tsx";
 import UserManualButton from "@/app/ui/user-manual-button.tsx";
 import AdminUserTable from "@/app/ui/admin-user-table.tsx";
 import ManagementUserTable from "@/app/ui/management-user-table.tsx";
+import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
 export default function Dashboard() {
     const [currentValidSession, setCurrentValidSession] = React.useState<
@@ -111,7 +112,7 @@ export default function Dashboard() {
             )}
 
             {loading
-                ? <CircularProgress size={36} />
+                ? <LogoSvgLoadingIcon />
                 : (
                     <Box sx={{ width: "100%", maxWidth: "lg" }}>
                         <Stack spacing={3}>

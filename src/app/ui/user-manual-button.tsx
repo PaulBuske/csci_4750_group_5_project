@@ -1,5 +1,6 @@
 import React from "react";
-import { Button, CircularProgress } from "@mui/material";
+import {Button} from "@mui/material";
+import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
 interface UserManualButtonProps {
     loading?: boolean;
@@ -15,7 +16,9 @@ export const UserManualButton = ({ loading }: UserManualButtonProps) => {
             target="_blank"
             rel="noopener noreferrer"
         >
-            {loading ? <CircularProgress size={24} /> : "User Manual"}
+            {loading
+                ? <LogoSvgLoadingIcon/>
+                : "User Manual"}
         </Button>
     );
 };

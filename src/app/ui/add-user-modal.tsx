@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import {
     Alert,
     Box,
@@ -11,7 +11,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { UserRole } from "@prisma/client";
+import {UserRole} from "@prisma/client";
 
 const style = {
     position: "absolute",

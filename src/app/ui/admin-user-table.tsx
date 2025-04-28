@@ -1,22 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import type { ProjectUser } from "../types/project-types.ts";
-import {
-    DataGrid,
-    GridColDef,
-    type GridRowId,
-    GridRowSelectionModel,
-} from "@mui/x-data-grid";
-import { formatDate } from "@/app/helper-functions.ts";
-import { Alert, Button } from "@mui/material";
+import type {ProjectUser} from "../types/project-types.ts";
+import {DataGrid, GridColDef, type GridRowId, GridRowSelectionModel,} from "@mui/x-data-grid";
+import {formatDate} from "@/app/helper-functions.ts";
+import {Alert, Button} from "@mui/material";
 import AddUserModal from "@/app/ui/add-user-modal.tsx";
 import ResetPasswordModal from "@/app/ui/reset-password-modal.tsx";
+import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
 interface AdminUserTableProps {
     currentUser: ProjectUser;
@@ -200,9 +195,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
 
     if (loading || (columns.length === 0 && currentUsers.length > 0)) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                <CircularProgress />
-            </Box>
+            <LogoSvgLoadingIcon/>
         );
     }
 
