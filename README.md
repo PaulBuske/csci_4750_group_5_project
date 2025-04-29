@@ -11,6 +11,10 @@ Install all dependencies:
 
 Install Deno using the docs at: https://docs.deno.com/runtime/getting_started/installation/
 
+Run docker compose
+```bash
+  docker compose up -d
+```
 
 Run the Prisma migration:
 ```bash
@@ -58,10 +62,15 @@ For production environments, use:
 ----
 
 ## Viewing Database
-To inspect you database with Prisma Studo:
-```bash
-  npx prisma studio
-```
+#### Access pgAdmin at http://localhost:5050
+- Log in with the credentials: admin@example.com / pgadmin
+- Add a new server connection with these details:
+- Name: Any name you want
+- Host: postgres (the service name in the Docker network)
+- Port: 5432
+- Username: postgres
+- Password: postgres
+- Database: timemanagement
 
 ----
 
