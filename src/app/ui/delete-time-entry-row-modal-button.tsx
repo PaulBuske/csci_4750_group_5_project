@@ -19,7 +19,7 @@ const style = {
     p: 4,
 };
 
-interface DeleteTimeEntryModalProps {
+type DeleteTimeEntryModalProps = {
     timeEntryRow?: TimeEntryRow;
     setLoading?: (value: ((prevState: boolean) => boolean) | boolean) => void;
 }
@@ -40,7 +40,7 @@ const DeleteTimeEntryModal = (
 
     async function deleteRowData(timeEntryRow: TimeEntryRow) {
         const apiUrl =
-            `/api/delete-time-entry?userId=${timeEntryRow.userId}&timeEntryId=${timeEntryRow.timeEntryId}`;
+            `/api/time-entry/delete-time-entry?userId=${timeEntryRow.userId}&timeEntryId=${timeEntryRow.timeEntryId}`;
 
         try {
             const response = await fetch(apiUrl, {

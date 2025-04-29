@@ -67,7 +67,7 @@ const TimePunchModal = (
 
         setSubmitting(true);
         try {
-            const response = await fetch("/api/time-punch", {
+            const response = await fetch("/api/time-entry/add-time-entry", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -121,6 +121,7 @@ const TimePunchModal = (
                         );
                     } else {
                         setClockedIn(!timeEntryData.clockOutTime);
+                        setLastTimeEntry(timeEntryData as TimeEntry);
                         if (timeEntryData.payPeriodId === null) {
                             console.warn(
                                 "Fetched time entry has a null payPeriodId:",
@@ -142,7 +143,7 @@ const TimePunchModal = (
         };
 
         fetchTimeEntry();
-    }, [currentUser]);
+    }, [currentUser, errorMessage]);
     return (
         <div>
             <Button

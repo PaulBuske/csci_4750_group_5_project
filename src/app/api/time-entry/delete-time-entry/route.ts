@@ -1,6 +1,6 @@
-import {NextResponse} from "next/server";
-import {dbSingleton} from "@/app/lib/dbSingleton.ts";
-import {Prisma} from "@prisma/client";
+import { NextResponse } from "next/server";
+import { dbSingleton } from "@/app/lib/dbSingleton.ts";
+import { Prisma } from "@prisma/client";
 
 export const DELETE = async (
     request: Request,
@@ -19,7 +19,10 @@ export const DELETE = async (
 
         const authenticatedUser = await dbSingleton.user.findUnique({
             where: { userId },
-            select: { userId: true },
+            select: {
+                userId: true,
+                role: true,
+            },
         });
 
         if (!authenticatedUser) {
@@ -27,6 +30,23 @@ export const DELETE = async (
                 { message: "Unauthorized - User not found" },
                 { status: 401 },
             );
+        }
+
+        if (authenticatedUser.userId !== userId ) {
+            return NextResponse.json(
+                { message: "Forbidden - User does not have permission" },
+                { status: 403 },
+            );
+        }
+
+
+        if(authenticatedUser.userId !== userId) {
+            if(authenticatedUser.role !== "MANAGER") {
+                return NextResponse.json(
+                    { message: "Unauthorized - User not authorized" },
+                    { status: 403 },
+                );
+            }
         }
 
         const timeEntry = await dbSingleton.timeEntry.findUnique({
