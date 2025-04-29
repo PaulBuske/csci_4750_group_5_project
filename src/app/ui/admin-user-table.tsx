@@ -1,14 +1,19 @@
 "use client";
 
 import * as React from "react";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import type {ProjectUser} from "../types/project-types.ts";
-import {DataGrid, GridColDef, type GridRowId, GridRowSelectionModel,} from "@mui/x-data-grid";
-import {formatDate} from "@/app/helper-functions.ts";
-import {Alert, Button, Fade} from "@mui/material";
+import type { ProjectUser } from "../types/project-types.ts";
+import {
+    DataGrid,
+    GridColDef,
+    type GridRowId,
+    GridRowSelectionModel,
+} from "@mui/x-data-grid";
+import { formatDate } from "@/app/helper-functions.ts";
+import { Alert, Button, Fade } from "@mui/material";
 import AddUserModal from "@/app/ui/add-user-modal.tsx";
 import ResetPasswordModal from "@/app/ui/reset-password-modal.tsx";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
@@ -59,10 +64,9 @@ const generateColumns = (user: ProjectUser): GridColDef[] => {
     });
 };
 
-
 type AdminUserTableProps = {
     currentUser: ProjectUser;
-}
+};
 
 const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     const [currentUsers, setCurrentUsers] = useState<ProjectUser[]>([]);
@@ -78,16 +82,25 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
     const [deleteUserButtonErrorMessage, setDeleteUserButtonErrorMessage] =
         useState("");
-    const [setResetPasswordButtonErrorMessage, setSetResetPasswordButtonErrorMessage] = useState("");
-    const [successAlertVisibility, setSuccessAlertVisibility] = React.useState<boolean>(false);
-    const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
-    const [errorAlertVisibility, setErrorAlertVisibility] = React.useState<boolean>(false);
+    const [
+        setResetPasswordButtonErrorMessage,
+        setSetResetPasswordButtonErrorMessage,
+    ] = useState("");
+    const [successAlertVisibility, setSuccessAlertVisibility] = React.useState<
+        boolean
+    >(false);
+    const [successMessage, setSuccessMessage] = React.useState<string | null>(
+        null,
+    );
+    const [errorAlertVisibility, setErrorAlertVisibility] = React.useState<
+        boolean
+    >(false);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
     const handleShowSuccessAlert = (providedSuccessMessage: string) => {
         const fiveSeconds = 5000;
         setSuccessAlertVisibility(true);
-        setSuccessMessage(providedSuccessMessage)
+        setSuccessMessage(providedSuccessMessage);
         setTimeout(() => {
             setSuccessAlertVisibility(false);
         }, fiveSeconds);
@@ -96,14 +109,14 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     const handleShowErrorAlert = (providedErrorMessage: string) => {
         const fiveSeconds = 5000;
         setErrorAlertVisibility(true);
-        setErrorMessage(providedErrorMessage)
+        setErrorMessage(providedErrorMessage);
         setTimeout(() => {
             setErrorAlertVisibility(false);
         }, fiveSeconds);
     };
 
     const handleDeleteUsers = async (userIds: string[]): Promise<boolean> => {
-        setLoading(true)
+        setLoading(true);
         try {
             const response = await fetch("/api/users/delete-user", {
                 method: "POST",
@@ -114,13 +127,17 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             });
 
             if (!response.ok) {
-                handleShowErrorAlert(`Failed to delete users: ${response.status}`);
+                handleShowErrorAlert(
+                    `Failed to delete users: ${response.status}`,
+                );
                 throw new Error(`Failed to delete users: ${response.status}`);
             }
 
             const data = await response.json();
             console.log(data.message);
-            handleShowSuccessAlert(data.message || "Users deleted successfully");
+            handleShowSuccessAlert(
+                data.message || "Users deleted successfully",
+            );
             return true;
         } catch (error) {
             console.error("Error deleting users:", error);
@@ -168,7 +185,9 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             try {
                 const response = await fetch("/api/users");
                 if (!response.ok) {
-                    handleShowErrorAlert(`Failed to fetch users: ${response.status}`);
+                    handleShowErrorAlert(
+                        `Failed to fetch users: ${response.status}`,
+                    );
                     throw new Error(
                         `Failed to fetch users: ${response.status}`,
                     );
@@ -217,9 +236,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     }
 
     if (loading || (columns.length === 0 && currentUsers.length > 0)) {
-        return (
-            <LogoSvgLoadingIcon/>
-        );
+        return <LogoSvgLoadingIcon />;
     }
 
     if (!currentUsers || currentUsers.length === 0) {
@@ -268,21 +285,6 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             width="100%"
             gap={2}
         >
-            <Fade in={successAlertVisibility} timeout={500}>
-                <Alert severity="success" onClose={() => {
-                    setSuccessAlertVisibility(false);
-                }}>
-                    {successMessage}
-                </Alert>
-            </Fade>
-
-            <Fade in={errorAlertVisibility} timeout={500}>
-                <Alert severity="success" onClose={() => {
-                    setErrorAlertVisibility(false);
-                }}>
-                    {errorMessage}
-                </Alert>
-            </Fade>
             <Paper
                 sx={{
                     height: "auto",
@@ -292,6 +294,27 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     flexDirection: "column",
                 }}
             >
+                <Fade in={successAlertVisibility} timeout={500}>
+                    <Alert
+                        severity="success"
+                        onClose={() => {
+                            setSuccessAlertVisibility(false);
+                        }}
+                    >
+                        {successMessage}
+                    </Alert>
+                </Fade>
+
+                <Fade in={errorAlertVisibility} timeout={500}>
+                    <Alert
+                        severity="success"
+                        onClose={() => {
+                            setErrorAlertVisibility(false);
+                        }}
+                    >
+                        {errorMessage}
+                    </Alert>
+                </Fade>
                 <DataGrid
                     rows={currentUsers}
                     columns={columns}

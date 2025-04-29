@@ -260,36 +260,12 @@ const ManagementUserTable = (
     }
 
     return (
-        <Box display="flex" flexDirection="column" width="100%">
-
-            <Fade in={successAlertVisibility} timeout={500}>
-            <Alert
-                severity="success"
-                onClose={() => {
-                    setSuccessAlertVisibility(false);
-                }}
-            >
-                {successMessage}
-            </Alert>
-        </Fade>
-            <Fade in={errorAlertVisibility} timeout={500}>
-                <Alert
-                    severity="success"
-                    onClose={() => {
-                        setErrorAlertVisibility(false);
-                    }}
-                >
-                    {errorMessage}
-                </Alert>
-            </Fade>
-
             <Box
                 display="flex"
                 flexDirection="row"
                 justifyContent="space-between"
                 width="100%"
             >
-
                 <Paper
                     sx={{
                         height: "auto",
@@ -300,6 +276,26 @@ const ManagementUserTable = (
                         flexDirection: "column",
                     }}
                 >
+                    <Fade in={successAlertVisibility} timeout={500}>
+                        <Alert
+                            severity="success"
+                            onClose={() => {
+                                setSuccessAlertVisibility(false);
+                            }}
+                        >
+                            {successMessage}
+                        </Alert>
+                    </Fade>
+                    <Fade in={errorAlertVisibility} timeout={500}>
+                        <Alert
+                            severity="success"
+                            onClose={() => {
+                                setErrorAlertVisibility(false);
+                            }}
+                        >
+                            {errorMessage}
+                        </Alert>
+                    </Fade>
                     <DataGrid
                         rows={currentUsers}
                         columns={columns}
@@ -345,7 +341,7 @@ const ManagementUserTable = (
                     component={Paper}
                     display="flex"
                     flexDirection="column"
-                    justifyContent="start"
+                    justifyContent="space-around"
                     alignItems="center"
                     width="100%"
                     maxWidth="lg"
@@ -375,9 +371,12 @@ const ManagementUserTable = (
                         disabled={selectedUsers === null ||
                             selectedUsers.length === 0 ||
                             selectedUsers.length > 1}
-                        onClick={() => handlePayTableUserChange(
-                            selectedUsers ? selectedUsers[0] : currentUserId,
-                        )}
+                        onClick={() =>
+                            handlePayTableUserChange(
+                                selectedUsers
+                                    ? selectedUsers[0]
+                                    : currentUserId,
+                            )}
                     >
                         View User Pay Stubs
                     </Button>
@@ -397,7 +396,6 @@ const ManagementUserTable = (
                     />
                 )}
             </Box>
-        </Box>
     );
 };
 

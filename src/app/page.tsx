@@ -10,7 +10,7 @@ export default function Home() {
             display="flex"
             flexDirection="column"
             alignItems="center"
-            justifyContent="center"
+            justifyContent="start"
             height="100vh"
         >
             <Box
