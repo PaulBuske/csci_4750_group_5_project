@@ -2,7 +2,7 @@ import React from "react";
 import {Button} from "@mui/material";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
-interface UserManualButtonProps {
+type UserManualButtonProps = {
     loading?: boolean;
 }
 

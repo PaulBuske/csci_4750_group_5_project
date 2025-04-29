@@ -13,7 +13,7 @@ import AddUserModal from "@/app/ui/add-user-modal.tsx";
 import ResetPasswordModal from "@/app/ui/reset-password-modal.tsx";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
-interface AdminUserTableProps {
+type AdminUserTableProps = {
     currentUser: ProjectUser;
 }
 
