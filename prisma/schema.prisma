@@ -8,19 +8,17 @@ generator client {
 }
 
 model User {
-  userId              String      @id @unique @default(uuid())
-  email               String      @unique
-  name                String?
-  password            String
-  hourlyRate          Decimal     @default(0.00) @db.Decimal(10, 2)
-  role                UserRole    @default(EMPLOYEE)
-  resetToken          String?     @unique
-  resetTokenExpiresAt DateTime?
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
-  sessions            Session[]
-  timeEntries         TimeEntry[]
-  payPeriods          PayPeriod[]
+  userId      String      @id @unique @default(uuid())
+  email       String      @unique
+  name        String?
+  password    String
+  hourlyRate  Decimal     @default(0.00) @db.Decimal(10, 2)
+  role        UserRole    @default(EMPLOYEE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  sessions    Session[]
+  timeEntries TimeEntry[]
+  payPeriods  PayPeriod[]
 }
 
 enum UserRole {
