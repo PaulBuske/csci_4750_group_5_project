@@ -68,9 +68,12 @@ const generateColumns = (user: ProjectUser): GridColDef[] => {
 
 type ManagementUserTableProps = {
     currentUser: ProjectUser;
+    handlePayTableUserChange: (userId: string) => void;
 };
 
-const ManagementUserTable = ({ currentUser }: ManagementUserTableProps) => {
+const ManagementUserTable = (
+    { currentUser, handlePayTableUserChange }: ManagementUserTableProps,
+) => {
     const [currentUsers, setCurrentUsers] = useState<ProjectUser[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -89,16 +92,19 @@ const ManagementUserTable = ({ currentUser }: ManagementUserTableProps) => {
     const [editHourlyRateModelOpen, setEditHourlyRateModelOpen] = useState(
         false,
     );
+    const [viewPayPeriodErrorMessage, setViewPayPeriodErrorMessage] = useState<
+        string | null
+    >(null);
     const currentUserId = currentUser.userId;
 
-
     const handleEditHourlyRate = async (userId: string, hourlyRate: number) => {
-
         if (!userId || userId.length === 0) {
             setErrorMessage("No user ID provided");
             return;
         }
-        if (hourlyRate === undefined || hourlyRate === null || isNaN(hourlyRate)) {
+        if (
+            hourlyRate === undefined || hourlyRate === null || isNaN(hourlyRate)
+        ) {
             setErrorMessage("Hourly rate is required and must be a number");
             return;
         }
@@ -121,19 +127,27 @@ const ManagementUserTable = ({ currentUser }: ManagementUserTableProps) => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error(`Failed to update hourly rate: ${response.status}`, errorData);
-                setErrorMessage(errorData.message || "Failed to update hourly rate");
-                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                console.error(
+                    `Failed to update hourly rate: ${response.status}`,
+                    errorData,
+                );
+                setErrorMessage(
+                    errorData.message || "Failed to update hourly rate",
+                );
+                throw new Error(
+                    errorData.message ||
+                    `HTTP error! status: ${response.status}`,
+                );
             }
 
-
             setErrorMessage(null);
-            setLoading(true)
-
+            setLoading(true);
         } catch (error) {
             console.error("Error in handleEditHourlyRate:", error);
             if (!errorMessage) {
-                setErrorMessage("An error occurred while updating the hourly rate.");
+                setErrorMessage(
+                    "An error occurred while updating the hourly rate.",
+                );
             }
             throw error;
         }
@@ -143,7 +157,7 @@ const ManagementUserTable = ({ currentUser }: ManagementUserTableProps) => {
     useEffect(() => {
         setIsClient(true);
 
-       const fetchUsers = async () => {
+        const fetchUsers = async () => {
             setErrorState(false);
             try {
                 const response = await fetch("/api/users");
@@ -262,8 +276,12 @@ const ManagementUserTable = ({ currentUser }: ManagementUserTableProps) => {
                             setEditHourlyRateButtonErrorMessage(
                                 "Cannot edit multiple users at once.",
                             );
+                            setViewPayPeriodErrorMessage(
+                                "Cannot view pay periods of multiple users at once.",
+                            );
                         } else {
                             setEditHourlyRateButtonErrorMessage(null);
+                            setViewPayPeriodErrorMessage(null);
                         }
                     }}
                 />
@@ -272,7 +290,7 @@ const ManagementUserTable = ({ currentUser }: ManagementUserTableProps) => {
                 component={Paper}
                 display="flex"
                 flexDirection="column"
-                justifyContent="space-around"
+                justifyContent="start"
                 alignItems="center"
                 width="100%"
                 maxWidth="lg"
@@ -297,18 +315,33 @@ const ManagementUserTable = ({ currentUser }: ManagementUserTableProps) => {
                         {editHourlyRateButtonErrorMessage}
                     </Alert>
                 )}
-                <Button variant="contained">
+                <Button
+                    variant="contained"
+                    disabled={selectedUsers === null ||
+                        selectedUsers.length === 0 ||
+                        selectedUsers.length > 1}
+                    onClick={() =>
+                        handlePayTableUserChange(
+                            selectedUsers ? selectedUsers[0] : currentUserId,
+                        )}
+                >
                     View User Pay Stubs
                 </Button>
+                { !!viewPayPeriodErrorMessage && (
+                    <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
+                        {viewPayPeriodErrorMessage}
+                    </Alert>
+                )}
             </Box>
-            {editHourlyRateModelOpen && selectedUsers && selectedUsers.length === 1 && (
-                <EditHourlyRateModal
-                    open={editHourlyRateModelOpen}
-                    onClose={() => setEditHourlyRateModelOpen(false)}
-                    selectedUserId={selectedUsers[0]}
-                    onEditHourlyRate={handleEditHourlyRate}
-                />
-            )}
+            {editHourlyRateModelOpen && selectedUsers &&
+                selectedUsers.length === 1 && (
+                    <EditHourlyRateModal
+                        open={editHourlyRateModelOpen}
+                        onClose={() => setEditHourlyRateModelOpen(false)}
+                        selectedUserId={selectedUsers[0]}
+                        onEditHourlyRate={handleEditHourlyRate}
+                    />
+                )}
         </Box>
     );
 };

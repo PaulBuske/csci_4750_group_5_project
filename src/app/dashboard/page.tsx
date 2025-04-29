@@ -23,6 +23,40 @@ export default function Dashboard() {
     const [loading, setLoading] = React.useState(true);
     const [timeEntryRefreshTrigger, setTimeEntryRefreshTrigger] = React
         .useState(0);
+    const [payTableUser, setPayTableUser] = React.useState<ProjectUser | null>(null);
+
+    const handlePayTableUserChange = async (newUserId: string) => {
+        console.log("handlePayTableUserChange called with newUserId:", newUserId);
+        console.log("Current user ID:", currentUser?.userId);
+        if (currentUser?.userId === newUserId) {
+            setPayTableUser(currentUser);
+            return
+        } else {
+            try {
+                const response = await fetch(`/api/users/get-user-for-pay-period-lookup`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        userIdToSearch: newUserId,
+                        currentUserId: currentUser?.userId,
+                    }),
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    console.log("User found:", data.foundUser);
+                    setPayTableUser(data.foundUser);
+                } else {
+                    console.error("Error fetching user:", data.message);
+                    setError(new Error(data.message));
+                }
+            } catch (error) {
+                console.error("Error in handlePayTableUserChange:", error);
+                setError(new Error("Failed to fetch user for pay period lookup."));
+            }
+        }
+    };
 
     const refreshSession = useCallback(async () => {
         try {
@@ -73,6 +107,7 @@ export default function Dashboard() {
                 } else {
                     setError(null);
                     setCurrentUser(foundUser);
+                    setPayTableUser(foundUser);
                 }
             } catch (error) {
                 setError(
@@ -86,11 +121,11 @@ export default function Dashboard() {
             }
         };
 
-        loadInitialData();
+        loadInitialData().then();
     }, [refreshSession, currentValidSession?.userId]);
 
     const handleTimePunchEvent = async () => {
-        await setTimeEntryRefreshTrigger((prev) => prev + 1);
+        setTimeEntryRefreshTrigger((prev) => prev + 1);
     };
 
     return (
@@ -187,7 +222,7 @@ export default function Dashboard() {
                                         </Box>
 
                                         <PayPeriodTable
-                                            currentUser={currentUser}
+                                            currentUser={payTableUser}
                                             refreshTrigger={timeEntryRefreshTrigger}
                                         />
 
@@ -200,6 +235,7 @@ export default function Dashboard() {
                                         {currentUser.role === "MANAGER" &&
                                             <ManagementUserTable
                                                 currentUser={currentUser}
+                                                handlePayTableUserChange={handlePayTableUserChange}
                                             />}
                                     </>
                                 )
