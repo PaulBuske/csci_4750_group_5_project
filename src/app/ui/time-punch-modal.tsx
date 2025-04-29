@@ -67,7 +67,7 @@ const TimePunchModal = (
 
         setSubmitting(true);
         try {
-            const response = await fetch("/api/time-punch", {
+            const response = await fetch("/api/time-entry/add-time-entry", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

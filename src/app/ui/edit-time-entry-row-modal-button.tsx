@@ -5,7 +5,12 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import CheckIcon from "@mui/icons-material/Check";
 import Cancel from "@mui/icons-material/Cancel";
-import {TimeEntryRow} from "@/app/types/project-types.ts";
+import { TimeEntryRow } from "@/app/types/project-types.ts";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { useEffect } from "react";
+import dayjs from "dayjs";
+import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 
 const style = {
     position: "absolute",
@@ -19,16 +24,31 @@ const style = {
     p: 4,
 };
 
-type DeleteTimeEntryModalProps = {
+type EditTimeEntryRowModalButtonProps = {
     timeEntryRow?: TimeEntryRow;
     setLoading?: (value: ((prevState: boolean) => boolean) | boolean) => void;
-}
+};
 
-const DeleteTimeEntryModal = (
-    { timeEntryRow, setLoading }: DeleteTimeEntryModalProps,
+const EditTimeEntryRowModalButton = (
+    { timeEntryRow, setLoading }: EditTimeEntryRowModalButtonProps,
 ) => {
     const [open, setOpen] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
+    const [clockInTime, setClockInTime] = React.useState<dayjs.Dayjs | null>(
+        null,
+    );
+    const [clockOutTime, setClockOutTime] = React.useState<dayjs.Dayjs | null>(
+        null,
+    );
+
+    useEffect(() => {
+        if (timeEntryRow?.clockInTime) {
+            setClockInTime(dayjs(timeEntryRow.clockInTime));
+        }
+        if (timeEntryRow?.clockOutTime) {
+            setClockOutTime(dayjs(timeEntryRow.clockOutTime));
+        }
+    }, [timeEntryRow]);
 
     const handleOpen = () => {
         setOpen(true);
@@ -38,47 +58,51 @@ const DeleteTimeEntryModal = (
         setLoading!(true);
     };
 
-    async function deleteRowData(timeEntryRow: TimeEntryRow) {
-        const apiUrl =
-            `/api/time-entry/delete-time-entry?userId=${timeEntryRow.userId}&timeEntryId=${timeEntryRow.timeEntryId}`;
+    async function editRowData(timeEntryRow: TimeEntryRow) {
+        const apiUrl = `/api/time-entry/delete-time-entry`;
 
         try {
             const response = await fetch(apiUrl, {
-                method: "DELETE",
+                method: "UPDATE",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({
+                    timeEntryId: timeEntryRow.timeEntryId,
+                    clockInTime: clockInTime?.toISOString(),
+                    clockOutTime: clockOutTime?.toISOString(),
+                }),
             });
 
             if (response.ok) {
-                console.log("Time entry deleted successfully.");
+                console.log("Time entry edited successfully.");
                 handleClose();
                 setLoading!(true);
                 setError(null);
             } else {
                 const errorData = await response.json();
                 console.error(
-                    "Failed to delete time entry:",
+                    "Failed to edit time entry:",
                     response.status,
                     errorData.message,
                 );
-                setError("Failed to delete time entry. Please try again.");
+                setError("Failed to edit time entry. Please try again.");
             }
         } catch (error) {
-            console.error("Error calling delete API:", error);
-            setError("An error occurred while deleting the time entry.");
+            console.error("Error calling edit API:", error);
+            setError("An error occurred while editing the time entry.");
         }
     }
 
     return (
         <div>
             <Button
-                color={"error"}
+                color={"secondary"}
                 onClick={handleOpen}
                 variant="contained"
                 size="small"
             >
-                DELETE
+                Edit
             </Button>
             <Modal
                 open={open}
@@ -92,29 +116,46 @@ const DeleteTimeEntryModal = (
                         variant="h6"
                         component="h2"
                     >
-                        Delete time entry:
+                        Edit time entry:
                     </Typography>
                     <Typography>
                         Clock in date: {timeEntryRow?.clockInTime
                             ? timeEntryRow.clockInTime.toLocaleDateString()
                             : "N/A"}
                     </Typography>
-                    <Typography>
-                        Clock in time: {timeEntryRow?.clockInTime
-                            ? timeEntryRow.clockInTime.toLocaleTimeString()
-                            : "N/A"}
-                    </Typography>
-                    <Typography>
-                        Clock out time: {timeEntryRow?.clockOutTime
-                            ? timeEntryRow.clockOutTime.toLocaleTimeString()
-                            : "N/A"}
-                    </Typography>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <TimePicker
+                            label="Clock In Timer"
+                            sx={{margin: "1rem"}}
+                            value={clockInTime || dayjs()}
+                            onChange={(newClockInTime) =>
+                                setClockInTime(newClockInTime)}
+                        />
+                        {timeEntryRow?.clockOutTime && (
+                        <TimePicker
+                            label="Clock Out Timer"
+                            sx={{margin: "1rem"}}
+                            value={clockOutTime || dayjs()}
+                            onChange={(newClockOutTime) => {
+                                if (
+                                    newClockOutTime && clockInTime &&
+                                    newClockOutTime.isBefore(clockInTime)
+                                ) {
+                                    setError(
+                                        "Clock out time cannot be before clock in time.",
+                                    );
+                                    return;
+                                }
+                                setClockOutTime(newClockOutTime);
+                            }}
+                        />
+                        )}
+                    </LocalizationProvider>
                     {error && (
                         <Typography color="error">
                             {error}
                         </Typography>
                     )}
-
                     <Box
                         display="flex"
                         flexDirection="row"
@@ -125,7 +166,7 @@ const DeleteTimeEntryModal = (
                         <Button
                             color="warning"
                             onClick={() => {
-                                deleteRowData(timeEntryRow!).then();
+                                editRowData(timeEntryRow!).then();
                             }}
                             variant="contained"
                         >
@@ -144,4 +185,4 @@ const DeleteTimeEntryModal = (
     );
 };
 
-export default DeleteTimeEntryModal;
+export default EditTimeEntryRowModalButton;

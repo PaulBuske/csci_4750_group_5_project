@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect} from "react";
+import { useEffect } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,19 +7,25 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import {PayPeriod, ProjectUser, TimeEntry, TimeEntryRow,} from "@/app/types/project-types.ts";
-import {Box, Stack, Typography} from "@mui/material";
+import {
+    PayPeriod,
+    ProjectUser,
+    TimeEntry,
+    TimeEntryRow,
+} from "@/app/types/project-types.ts";
+import { Box, Stack, Typography } from "@mui/material";
 import {
     getOrCreatePayPeriodIfNotExists,
     getPayPeriodByPeriodIdAndUserId,
     getTimeEntriesByPayPeriodIdAndUserId,
 } from "@/app/lib/data-access-layer.ts";
-import {DatePicker} from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
-import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import DeleteRowModalButton from "@/app/ui/delete-time-entry-row-modal-button.tsx";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
+import EditTimeEntryRowModalButton from "@/app/ui/edit-time-entry-row-modal-button.tsx";
 
 const TAX_RATE = 0.12;
 
@@ -211,7 +217,7 @@ const PayPeriodTable = (
                 </LocalizationProvider>
             </Stack>
             {loading
-                ? <LogoSvgLoadingIcon/>
+                ? <LogoSvgLoadingIcon />
                 : (
                     <TableContainer component={Paper}>
                         <Table
@@ -272,11 +278,23 @@ const PayPeriodTable = (
                                         <TableCell align="right">
                                             {ccyFormat(timeEntryRow.earned)}
                                         </TableCell>
-                                        <TableCell>
-                                            <DeleteRowModalButton
-                                                timeEntryRow={timeEntryRow}
-                                                setLoading={setLoading}
-                                            />
+                                        <TableCell
+                                        width='15rem'
+                                        >
+                                            <Box
+                                                display="flex"
+                                                alignItems="center"
+                                                flexDirection="row"
+                                            >
+                                                <EditTimeEntryRowModalButton
+                                                    timeEntryRow={timeEntryRow}
+                                                    setLoading={setLoading}
+                                                />
+                                                <DeleteRowModalButton
+                                                    timeEntryRow={timeEntryRow}
+                                                    setLoading={setLoading}
+                                                />
+                                            </Box>
                                         </TableCell>
                                     </TableRow>
                                 ))}
