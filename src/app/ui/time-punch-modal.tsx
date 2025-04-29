@@ -29,14 +29,17 @@ const style = {
 type TimePunchModalProps = {
     currentUser?: ProjectUser | null;
     onPunchSuccess?: () => void;
+    handleShowSuccessAlert?: (message: string) => void;
+    handleShowErrorAlert?: (message: string) => void;
 };
 
 const TimePunchModal = (
-    { currentUser, onPunchSuccess }: TimePunchModalProps,
+    { currentUser, onPunchSuccess, handleShowSuccessAlert, handleShowErrorAlert }: TimePunchModalProps,
 ) => {
     const [open, setOpen] = useState(false);
     const [selectedTime, setSelectedTime] = useState<Dayjs | null>(dayjs());
     const [submitting, setSubmitting] = useState(false);
+    const [errorState, setErrorState] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [timeEntry, setTimeEntry] = useState<TimeEntry | null>(null);
     const [clockedIn, setClockedIn] = useState<boolean>(false);
@@ -53,7 +56,7 @@ const TimePunchModal = (
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!selectedTime || !currentUser?.userId) {
-            setErrorMessage("Something went wrong. Please try again.");
+            handleShowErrorAlert("Something went wrong. Please try again.");
             return;
         }
 
@@ -61,10 +64,10 @@ const TimePunchModal = (
             clockedIn && lastTimeEntry &&
             selectedTime.isBefore(dayjs(lastTimeEntry.clockInTime))
         ) {
+            setErrorState(true);
             setErrorMessage("Clock out time cannot be before clock in time.");
             return;
         }
-
         setSubmitting(true);
         try {
             const response = await fetch("/api/time-entry/add-time-entry", {
@@ -86,18 +89,19 @@ const TimePunchModal = (
                 setSubmitting(false);
                 if (onPunchSuccess) {
                     onPunchSuccess();
+                    handleShowSuccessAlert("Time punch successful!");
                 }
                 handleClose();
             } else {
                 console.error("Time punch failed");
-                setErrorMessage(
+                handleShowErrorAlert(
                     "Failed to submit time punch. Please try again.",
                 );
                 setSubmitting(false);
             }
         } catch (error) {
             console.error("Error submitting time punch:", error);
-            setErrorMessage(
+            handleShowErrorAlert(
                 "An error occurred while submitting the time punch.",
             );
             setSubmitting(false);
@@ -116,9 +120,7 @@ const TimePunchModal = (
                         );
 
                     if (timeEntryData === null) {
-                        console.log(
-                            "No previous time entry found for this user.",
-                        );
+                        handleShowErrorAlert("No time entry found.");
                     } else {
                         setClockedIn(!timeEntryData.clockOutTime);
                         setLastTimeEntry(timeEntryData as TimeEntry);
@@ -127,13 +129,15 @@ const TimePunchModal = (
                                 "Fetched time entry has a null payPeriodId:",
                                 timeEntryData,
                             );
+                            handleShowErrorAlert("No pay period found.");
                         } else {
                             setLastTimeEntry(timeEntryData as TimeEntry);
+                            handleShowSuccessAlert("Time entry fetched successfully!");
                         }
                     }
                 } catch (error) {
                     console.error("Error fetching time entry:", error);
-                    setErrorMessage(
+                    handleShowErrorAlert(
                         "An error occurred while fetching the time entry.",
                     );
                     setClockedIn(false);
@@ -195,7 +199,7 @@ const TimePunchModal = (
                                 />
                             </LocalizationProvider>
 
-                            {errorMessage && (
+                            {errorState && (
                                 <Typography color="error">
                                     {errorMessage}
                                 </Typography>

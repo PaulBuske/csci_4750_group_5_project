@@ -3,7 +3,13 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 -----
+
 ## Getting Started
+
+## Environment Setup
+
+Create a `.env` file in the project root using the .example.env file as a template. This file will contain your environment variables.
+
 Install all dependencies:
 ```bash
   npm install
@@ -32,10 +38,10 @@ Run the development server:
 ```bash
   deno task dev
 ```
-
-## Environment Setup
-
-Create a `.env` file in the project root using the .example.env file as a template. This file will contain your environment variables.
+Validate current build:
+```bash
+  deno task build
+```
 
 ### Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

@@ -30,34 +30,33 @@ const style = {
 type AddUserModalProps = {
     open: boolean;
     onClose: () => void;
-    setErrorState: React.Dispatch<React.SetStateAction<boolean>>;
-    setErrorMessage?: (value: ((prevState: string) => string) | string) => void;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    handleShowSuccessAlert?: (message: string) => void;
+    handleShowErrorAlert?: (message: string) => void;
 };
 
 const AddUserModal = (
-    { open, onClose, setErrorState, setErrorMessage, setLoading }:
-        AddUserModalProps,
+    { open, onClose, setLoading, handleShowSuccessAlert, handleShowErrorAlert }: AddUserModalProps
 ) => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState<UserRole>(UserRole.EMPLOYEE);
+    const [errorState, setErrorState] = useState(false);
     const [modalErrorMessage, setModalErrorMessage] = useState("");
 
     const handleSubmit = async () => {
         setErrorState(false);
-        if (setErrorMessage) {
-            setErrorMessage("");
-        }
         setModalErrorMessage("");
 
         if (!name || !email || !password) {
+            setErrorState(true);
             setModalErrorMessage("Please fill out all required fields");
             return;
         }
 
         if (email.includes(" ")) {
+            setErrorState(true);
             setModalErrorMessage("Email cannot contain spaces");
             return;
         }
@@ -65,6 +64,7 @@ const AddUserModal = (
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
+            setErrorState(true);
             setModalErrorMessage("Please enter a valid email address");
             return;
         }
@@ -82,9 +82,8 @@ const AddUserModal = (
                 const errorData = await response.json().catch(() => ({
                     message: `HTTP error ${response.status}`,
                 }));
-                setErrorState(true);
                 if (setErrorMessage) {
-                    setErrorMessage(
+                    handleShowErrorAlert(
                         `Failed to add user: ${
                             errorData.message || response.statusText
                         }`,
@@ -96,10 +95,10 @@ const AddUserModal = (
             if (setLoading) {
                 setLoading(true);
             }
+            handleShowSuccessAlert?.("User added successfully");
             onClose();
         } catch (error) {
             console.error("Error submitting new user:", error);
-            setErrorState(true);
             if (setErrorMessage) {
                 setErrorMessage(
                     "An unexpected error occurred while adding the user.",
@@ -114,9 +113,7 @@ const AddUserModal = (
         setPassword("");
         setRole(UserRole.EMPLOYEE);
         setErrorState(false);
-        if (setErrorMessage) {
-            setErrorMessage("");
-        }
+        setModalErrorMessage("");
         onClose();
     };
 
@@ -169,7 +166,7 @@ const AddUserModal = (
                         <MenuItem value={UserRole.ADMIN}>ADMIN</MenuItem>
                     </Select>
                 </FormControl>
-                {modalErrorMessage && (
+                {errorState && (
                     <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
                         {modalErrorMessage}
                     </Alert>

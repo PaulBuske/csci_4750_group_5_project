@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect } from "react";
+import {useEffect} from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,22 +7,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import {
-    PayPeriod,
-    ProjectUser,
-    TimeEntry,
-    TimeEntryRow,
-} from "@/app/types/project-types.ts";
-import { Box, Stack, Typography } from "@mui/material";
+import {PayPeriod, ProjectUser, TimeEntry, TimeEntryRow,} from "@/app/types/project-types.ts";
+import {Alert, Box, Fade, Stack, Typography} from "@mui/material";
 import {
     getOrCreatePayPeriodIfNotExists,
     getPayPeriodByPeriodIdAndUserId,
     getTimeEntriesByPayPeriodIdAndUserId,
 } from "@/app/lib/data-access-layer.ts";
-import { DatePicker } from "@mui/x-date-pickers";
+import {DatePicker} from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import DeleteRowModalButton from "@/app/ui/delete-time-entry-row-modal-button.tsx";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 import EditTimeEntryRowModalButton from "@/app/ui/edit-time-entry-row-modal-button.tsx";
@@ -80,11 +75,11 @@ type PayPeriodTableProps = {
 };
 const today = new Date();
 
+
 const PayPeriodTable = (
     { currentUser, refreshTrigger }: PayPeriodTableProps,
 ) => {
     const [payPeriodLookup, setPayPeriodLookup] = React.useState<Date>(today);
-    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     const [timeEntryRows, setTimeEntryRows] = React.useState<TimeEntryRow[]>(
         [],
     );
@@ -95,11 +90,34 @@ const PayPeriodTable = (
         PayPeriod | null
     >(null);
     const [loading, setLoading] = React.useState<boolean>(true);
+    const [successAlertVisibility, setSuccessAlertVisibility] = React.useState<boolean>(false);
+    const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+    const [errorAlertVisibility, setErrorAlertVisibility] = React.useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+    const handleShowSuccessAlert = (providedSuccessMessage: string) => {
+        const fiveSeconds = 5000;
+        setSuccessAlertVisibility(true);
+        setSuccessMessage(providedSuccessMessage)
+        setTimeout(() => {
+            setSuccessAlertVisibility(false);
+        }, fiveSeconds);
+    };
+
+    const handleShowErrorAlert = (providedErrorMessage) => {
+        const fiveSeconds = 5000;
+        setErrorAlertVisibility(true);
+        setErrorMessage(providedErrorMessage)
+        setTimeout(() => {
+            setErrorAlertVisibility(false);
+        }, fiveSeconds);
+    };
+
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
             if (!currentUser || !currentUser.userId) {
-                setErrorMessage("User not found.");
+                handleShowErrorAlert("User not found.")
                 resetStates();
                 setLoading(false);
                 return;
@@ -112,7 +130,7 @@ const PayPeriodTable = (
                 );
 
                 if (!payPeriodId) {
-                    setErrorMessage("Pay period not found.");
+                    handleShowErrorAlert("Pay period not found.")
                     resetStates();
                     setLoading(false);
                     return;
@@ -124,7 +142,7 @@ const PayPeriodTable = (
                 );
 
                 if (!payPeriod) {
-                    setErrorMessage("Pay period not found.");
+                    handleShowErrorAlert("Pay period not found.")
                     resetStates();
                     setLoading(false);
                     return;
@@ -138,9 +156,7 @@ const PayPeriodTable = (
                 );
 
                 if (!timeEntries || timeEntries.length === 0) {
-                    setErrorMessage(
-                        "No time entries found for this pay period.",
-                    );
+                    handleShowErrorAlert("No time entries found for this pay period.")
                     resetStates();
                     setLoading(false);
                     return;
@@ -162,14 +178,15 @@ const PayPeriodTable = (
                 setPayStubTaxes(taxes);
                 setPayStubNetPay(netPay);
 
+                handleShowSuccessAlert("Data fetched successfully")
                 setErrorMessage(null);
                 setLoading(false);
             } catch (e: unknown) {
                 if (e instanceof Error) {
-                    setErrorMessage(e.message);
+                    handleShowErrorAlert(e.message)
                     console.error("Failed to fetch data:", e.message);
                 } else {
-                    setErrorMessage("Unexpected error fetching data");
+                    handleShowErrorAlert("Unexpected error fetching data")
                     console.error("Unexpected error:", e);
                 }
                 resetStates();
@@ -189,14 +206,30 @@ const PayPeriodTable = (
     }, [currentUser, payPeriodLookup, refreshTrigger, loading]);
 
     return (
-        <Box>
-            <Stack
+ <Box>
+     {loading
+         ? (<LogoSvgLoadingIcon />) :
+         (<Box>
+             <Stack
                 paddingTop="2rem"
                 paddingBottom="2rem"
             >
-                {errorMessage && (
-                    <Typography color="error">{errorMessage}</Typography>
-                )}
+                 <Fade in={successAlertVisibility} timeout={500}>
+                     <Alert severity="success" onClose={() => {
+                         successAlertVisibility(false);
+                     }}>
+                            {successMessage}
+                     </Alert>
+                 </Fade>
+
+                 <Fade in={errorAlertVisibility()} timeout={500}>
+                     <Alert severity="success" onClose={() => {
+                         setErrorAlertVisibility(false);
+                     }}>
+                         {errorMessage}
+                     </Alert>
+                 </Fade>
+
                 <Typography>Pick date to view previous pay periods:</Typography>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
@@ -209,9 +242,6 @@ const PayPeriodTable = (
                     />
                 </LocalizationProvider>
             </Stack>
-            {loading
-                ? <LogoSvgLoadingIcon />
-                : (
                     <TableContainer component={Paper}>
                         <Table
                             sx={{ minWidth: 700 }}
@@ -302,10 +332,14 @@ const PayPeriodTable = (
                                                         >
                                                             <EditTimeEntryRowModalButton
                                                                 timeEntryRow={timeEntryRow}
+                                                                handleShowSuccessAlert={handleShowSuccessAlert}
+                                                                handleShowErrorAlert={handleShowErrorAlert}
                                                                 setLoading={setLoading}
                                                             />
                                                             <DeleteRowModalButton
                                                                 timeEntryRow={timeEntryRow}
+                                                                handleShowSuccessAlert={handleShowSuccessAlert}
+                                                                handleShowErrorAlert={handleShowErrorAlert}
                                                                 setLoading={setLoading}
                                                             />
                                                         </Box>
@@ -359,6 +393,7 @@ const PayPeriodTable = (
                             </TableBody>
                         </Table>
                     </TableContainer>
+             </Box>
                 )}
         </Box>
     );

@@ -1,20 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import type { ProjectUser } from "../types/project-types.ts";
+import type {ProjectUser} from "../types/project-types.ts";
 
-import {
-    DataGrid,
-    GridColDef,
-    type GridRowId,
-    GridRowSelectionModel,
-} from "@mui/x-data-grid";
-import { formatDate } from "@/app/helper-functions.ts";
-import { Alert, Button } from "@mui/material";
+import {DataGrid, GridColDef, type GridRowId, GridRowSelectionModel,} from "@mui/x-data-grid";
+import {formatDate} from "@/app/helper-functions.ts";
+import {Alert, Button} from "@mui/material";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 import EditHourlyRateModal from "@/app/ui/edit-hourly-rate-modal.tsx";
 
@@ -77,13 +72,11 @@ const ManagementUserTable = (
     const [currentUsers, setCurrentUsers] = useState<ProjectUser[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [errorState, setErrorState] = useState<boolean>(false);
     const [isClient, setIsClient] = useState(false);
     const [paginationModel, setPaginationModel] = useState({
         pageSize: 10,
         page: 0,
     });
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedUsers, setSelectedUsers] = useState<string[] | null>(null);
     const [
         editHourlyRateButtonErrorMessage,
@@ -95,21 +88,44 @@ const ManagementUserTable = (
     const [viewPayPeriodErrorMessage, setViewPayPeriodErrorMessage] = useState<
         string | null
     >(null);
+    const [successAlertVisibility, setSuccessAlertVisibility] = React.useState<boolean>(false);
+    const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+    const [errorAlertVisibility, setErrorAlertVisibility] = React.useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+    const handleShowSuccessAlert = (providedSuccessMessage: string) => {
+        const fiveSeconds = 5000;
+        setSuccessAlertVisibility(true);
+        setSuccessMessage(providedSuccessMessage)
+        setTimeout(() => {
+            setSuccessAlertVisibility(false);
+        }, fiveSeconds);
+    };
+
+    const handleShowErrorAlert = (providedErrorMessage) => {
+        const fiveSeconds = 5000;
+        setErrorAlertVisibility(true);
+        setErrorMessage(providedErrorMessage)
+        setTimeout(() => {
+            setErrorAlertVisibility(false);
+        }, fiveSeconds);
+    };
+
     const currentUserId = currentUser.userId;
 
     const handleEditHourlyRate = async (userId: string, hourlyRate: number) => {
         if (!userId || userId.length === 0) {
-            setErrorMessage("No user ID provided");
+           handleShowErrorAlert("No user ID provided");
             return;
         }
         if (
             hourlyRate === undefined || hourlyRate === null || isNaN(hourlyRate)
         ) {
-            setErrorMessage("Hourly rate is required and must be a number");
+           handleShowErrorAlert("Hourly rate is required and must be a number");
             return;
         }
         if (hourlyRate < 0) {
-            setErrorMessage("Hourly rate must be positive");
+           handleShowErrorAlert("Hourly rate must be positive");
             return;
         }
 
@@ -131,7 +147,7 @@ const ManagementUserTable = (
                     `Failed to update hourly rate: ${response.status}`,
                     errorData,
                 );
-                setErrorMessage(
+               handleShowErrorAlert(
                     errorData.message || "Failed to update hourly rate",
                 );
                 throw new Error(
@@ -140,12 +156,12 @@ const ManagementUserTable = (
                 );
             }
 
-            setErrorMessage(null);
+            handleShowSuccessAlert("Hourly rate updated successfully");
             setLoading(true);
         } catch (error) {
             console.error("Error in handleEditHourlyRate:", error);
             if (!errorMessage) {
-                setErrorMessage(
+               handleShowErrorAlert(
                     "An error occurred while updating the hourly rate.",
                 );
             }
@@ -158,7 +174,6 @@ const ManagementUserTable = (
         setIsClient(true);
 
         const fetchUsers = async () => {
-            setErrorState(false);
             try {
                 const response = await fetch("/api/users");
                 if (!response.ok) {
@@ -171,6 +186,7 @@ const ManagementUserTable = (
                     const usersWithId = data.users.map((user: ProjectUser) => ({
                         ...user,
                     }));
+                    handleShowSuccessAlert("Users fetched successfully");
                     setCurrentUsers(usersWithId);
                     setColumns(generateColumns(usersWithId[0]));
                 } else {
@@ -180,13 +196,14 @@ const ManagementUserTable = (
             } catch (error: unknown) {
                 if (error instanceof Error) {
                     console.error("Error fetching users:", error.message);
+                    handleShowErrorAlert(`Error fetching users: ${error.message}`);
                 } else {
                     console.error(
                         "Unexpected errorMessage fetching users:",
                         error,
                     );
+                    handleShowErrorAlert("Unexpected errorMessage fetching users");
                 }
-                setErrorState(true);
                 setCurrentUsers([]);
                 setColumns([]);
             } finally {
@@ -232,11 +249,6 @@ const ManagementUserTable = (
             justifyContent="space-between"
             width="100%"
         >
-            {errorState && (
-                <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
-                    {errorMessage}
-                </Alert>
-            )}
             <Paper
                 sx={{
                     height: "auto",

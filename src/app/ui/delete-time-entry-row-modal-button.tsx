@@ -22,10 +22,12 @@ const style = {
 type DeleteTimeEntryModalProps = {
     timeEntryRow?: TimeEntryRow;
     setLoading?: (value: ((prevState: boolean) => boolean) | boolean) => void;
+    handleShowSuccessAlert?: (message: string) => void;
+    handleShowErrorAlert?: (message: string) => void;
 }
 
 const DeleteTimeEntryModal = (
-    { timeEntryRow, setLoading }: DeleteTimeEntryModalProps,
+    { timeEntryRow, setLoading, handleShowSuccessAlert, handleShowErrorAlert }: DeleteTimeEntryModalProps,
 ) => {
     const [open, setOpen] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
@@ -52,6 +54,7 @@ const DeleteTimeEntryModal = (
 
             if (response.ok) {
                 console.log("Time entry deleted successfully.");
+                handleShowSuccessAlert?.("Time entry deleted successfully.");
                 handleClose();
                 setLoading!(true);
                 setError(null);
@@ -62,10 +65,12 @@ const DeleteTimeEntryModal = (
                     response.status,
                     errorData.message,
                 );
+                setError(errorData.message || "Failed to delete time entry.");
                 setError("Failed to delete time entry. Please try again.");
             }
         } catch (error) {
             console.error("Error calling delete API:", error);
+            handleShowErrorAlert("An error occurred while deleting the time entry.");
             setError("An error occurred while deleting the time entry.");
         }
     }
