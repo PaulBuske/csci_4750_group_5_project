@@ -98,7 +98,6 @@ const PayPeriodTable = (
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
-
             if (!currentUser || !currentUser.userId) {
                 setErrorMessage("User not found.");
                 resetStates();
@@ -164,7 +163,7 @@ const PayPeriodTable = (
                 setPayStubNetPay(netPay);
 
                 setErrorMessage(null);
-                setLoading(false)
+                setLoading(false);
             } catch (e: unknown) {
                 if (e instanceof Error) {
                     setErrorMessage(e.message);
@@ -219,6 +218,18 @@ const PayPeriodTable = (
                             aria-label="spanning table"
                         >
                             <TableHead>
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={6}
+                                        align="center"
+                                        sx={{
+                                            fontSize: "1.5rem",
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        Pay Period for {currentUser?.name}
+                                    </TableCell>
+                                </TableRow>
                                 <TableRow>
                                     <TableCell align="left" colSpan={3}>
                                         Pay Period Start:{" "}
