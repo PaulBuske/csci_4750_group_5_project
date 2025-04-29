@@ -13,10 +13,6 @@ import AddUserModal from "@/app/ui/add-user-modal.tsx";
 import ResetPasswordModal from "@/app/ui/reset-password-modal.tsx";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
-type AdminUserTableProps = {
-    currentUser: ProjectUser;
-}
-
 const handleDeleteUsers = async (userIds: string[]): Promise<boolean> => {
     try {
         const response = await fetch("/api/users/delete-user", {
@@ -86,6 +82,11 @@ const generateColumns = (user: ProjectUser): GridColDef[] => {
     });
 };
 
+
+type AdminUserTableProps = {
+    currentUser: ProjectUser;
+}
+
 const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     const [currentUsers, setCurrentUsers] = useState<ProjectUser[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
@@ -102,7 +103,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
     const [deleteUserButtonErrorMessage, setDeleteUserButtonErrorMessage] =
         useState("");
-    const [resetPasswordWarning, setResetPasswordWarning] = useState("");
+    const [setResetPasswordButtonErrorMessage, setSetResetPasswordButtonErrorMessage] = useState("");
 
     const handleDeleteSelected = async () => {
         if (selectedUsers.length === 0) return;
@@ -284,7 +285,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                             setDeleteUserButtonErrorMessage(
                                 "Cannot delete yourself",
                             );
-                            setResetPasswordWarning(
+                            setSetResetPasswordButtonErrorMessage(
                                 "Admins cannot reset their own password.",
                             );
                         } else {
@@ -340,7 +341,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                 </Button>
                 {isCurrentUserSelected && (
                     <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
-                        {resetPasswordWarning}
+                        {setResetPasswordButtonErrorMessage}
                     </Alert>
                 )}
             </Box>

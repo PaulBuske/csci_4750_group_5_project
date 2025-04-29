@@ -1,16 +1,22 @@
 "use client";
 
 import * as React from "react";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import type {ProjectUser} from "../types/project-types.ts";
+import type { ProjectUser } from "../types/project-types.ts";
 
-import {DataGrid, GridColDef} from "@mui/x-data-grid";
-import {formatDate} from "@/app/helper-functions.ts";
-import {Button} from "@mui/material";
+import {
+    DataGrid,
+    GridColDef,
+    type GridRowId,
+    GridRowSelectionModel,
+} from "@mui/x-data-grid";
+import { formatDate } from "@/app/helper-functions.ts";
+import { Alert, Button } from "@mui/material";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
+import EditHourlyRateModal from "@/app/ui/edit-hourly-rate-modal.tsx";
 
 const EXCLUDED_FIELDS = [
     "password",
@@ -60,7 +66,11 @@ const generateColumns = (user: ProjectUser): GridColDef[] => {
     });
 };
 
-const ManagementUserTable = () => {
+type ManagementUserTableProps = {
+    currentUser: ProjectUser;
+};
+
+const ManagementUserTable = ({ currentUser }: ManagementUserTableProps) => {
     const [currentUsers, setCurrentUsers] = useState<ProjectUser[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -70,12 +80,70 @@ const ManagementUserTable = () => {
         pageSize: 10,
         page: 0,
     });
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [selectedUsers, setSelectedUsers] = useState<string[] | null>(null);
+    const [
+        editHourlyRateButtonErrorMessage,
+        setEditHourlyRateButtonErrorMessage,
+    ] = useState<string | null>(null);
+    const [editHourlyRateModelOpen, setEditHourlyRateModelOpen] = useState(
+        false,
+    );
+    const currentUserId = currentUser.userId;
+
+
+    const handleEditHourlyRate = async (userId: string, hourlyRate: number) => {
+
+        if (!userId || userId.length === 0) {
+            setErrorMessage("No user ID provided");
+            return;
+        }
+        if (hourlyRate === undefined || hourlyRate === null || isNaN(hourlyRate)) {
+            setErrorMessage("Hourly rate is required and must be a number");
+            return;
+        }
+        if (hourlyRate < 0) {
+            setErrorMessage("Hourly rate must be positive");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/users/edit-hourly-rate", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userIdToEdit: userId,
+                    updatedHourlyRate: hourlyRate,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error(`Failed to update hourly rate: ${response.status}`, errorData);
+                setErrorMessage(errorData.message || "Failed to update hourly rate");
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+
+            setErrorMessage(null);
+            setLoading(true)
+
+        } catch (error) {
+            console.error("Error in handleEditHourlyRate:", error);
+            if (!errorMessage) {
+                setErrorMessage("An error occurred while updating the hourly rate.");
+            }
+            throw error;
+        }
+    };
+    const isCurrentUserSelected = selectedUsers?.includes(currentUser.userId);
 
     useEffect(() => {
         setIsClient(true);
 
-        const fetchUsers = async () => {
-            setLoading(true);
+       const fetchUsers = async () => {
             setErrorState(false);
             try {
                 const response = await fetch("/api/users");
@@ -99,7 +167,10 @@ const ManagementUserTable = () => {
                 if (error instanceof Error) {
                     console.error("Error fetching users:", error.message);
                 } else {
-                    console.error("Unexpected error fetching users:", error);
+                    console.error(
+                        "Unexpected errorMessage fetching users:",
+                        error,
+                    );
                 }
                 setErrorState(true);
                 setCurrentUsers([]);
@@ -110,31 +181,18 @@ const ManagementUserTable = () => {
         };
 
         fetchUsers().then();
-    }, []);
+    }, [loading]);
 
     if (!isClient) {
         return null;
     }
 
     if (loading) {
-        return (
-            <LogoSvgLoadingIcon/>
-        );
-    }
-
-    if (errorState) {
-        return (
-            <Paper sx={{ p: 2, textAlign: "center", color: "error.main" }}>
-                <Typography variant="h6">Error loading users</Typography>
-                <Typography variant="body2">Please try again later</Typography>
-            </Paper>
-        );
+        return <LogoSvgLoadingIcon />;
     }
 
     if (columns.length === 0 && currentUsers.length > 0) {
-        return (
-            <LogoSvgLoadingIcon/>
-        );
+        return <LogoSvgLoadingIcon />;
     }
 
     if (!currentUsers || currentUsers.length === 0) {
@@ -160,6 +218,11 @@ const ManagementUserTable = () => {
             justifyContent="space-between"
             width="100%"
         >
+            {errorState && (
+                <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
+                    {errorMessage}
+                </Alert>
+            )}
             <Paper
                 sx={{
                     height: "auto",
@@ -180,6 +243,29 @@ const ManagementUserTable = () => {
                     checkboxSelection
                     disableRowSelectionOnClick
                     sx={{ border: 0 }}
+                    onRowSelectionModelChange={(
+                        newSelectionModel: GridRowSelectionModel,
+                    ) => {
+                        const selectedRowIdsSet: Set<GridRowId> =
+                            newSelectionModel.ids;
+                        const selectedUserIds = Array.from(selectedRowIdsSet)
+                            .map((id) => String(id));
+                        setSelectedUsers(selectedUserIds);
+
+                        if (
+                            selectedUserIds.includes(currentUserId)
+                        ) {
+                            setEditHourlyRateButtonErrorMessage(
+                                "Cannot edit your own hourly rate.",
+                            );
+                        } else if (selectedUserIds.length > 1) {
+                            setEditHourlyRateButtonErrorMessage(
+                                "Cannot edit multiple users at once.",
+                            );
+                        } else {
+                            setEditHourlyRateButtonErrorMessage(null);
+                        }
+                    }}
                 />
             </Paper>
             <Box
@@ -194,13 +280,35 @@ const ManagementUserTable = () => {
                 <Typography variant="h6" sx={{ mb: 2 }}>
                     User Management
                 </Typography>
-                <Button variant="contained" sx={{ height: "3rem", mb: 2 }}>
+                <Button
+                    variant="contained"
+                    sx={{ height: "3rem", mb: 2 }}
+                    disabled={selectedUsers === null ||
+                        selectedUsers.length === 0 ||
+                        isCurrentUserSelected}
+                    onClick={() => {
+                        setEditHourlyRateModelOpen(true);
+                    }}
+                >
                     Edit Hourly Rate
                 </Button>
+                {isCurrentUserSelected && (
+                    <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
+                        {editHourlyRateButtonErrorMessage}
+                    </Alert>
+                )}
                 <Button variant="contained">
                     View User Pay Stubs
                 </Button>
             </Box>
+            {editHourlyRateModelOpen && selectedUsers && selectedUsers.length === 1 && (
+                <EditHourlyRateModal
+                    open={editHourlyRateModelOpen}
+                    onClose={() => setEditHourlyRateModelOpen(false)}
+                    selectedUserId={selectedUsers[0]}
+                    onEditHourlyRate={handleEditHourlyRate}
+                />
+            )}
         </Box>
     );
 };

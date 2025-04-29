@@ -198,7 +198,9 @@ export default function Dashboard() {
                                                 />
                                             )}
                                         {currentUser.role === "MANAGER" &&
-                                            <ManagementUserTable />}
+                                            <ManagementUserTable
+                                                currentUser={currentUser}
+                                            />}
                                     </>
                                 )
                                 : (

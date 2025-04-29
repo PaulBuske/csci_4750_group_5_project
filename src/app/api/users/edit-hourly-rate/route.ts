@@ -1,9 +1,9 @@
-import {dbSingleton} from "@/app/lib/dbSingleton.ts";
-import {NextResponse} from "next/server";
-import bcrypt from "bcrypt";
-import {verifySession} from "@/app/lib/data-access-layer.ts";
+import { dbSingleton } from "@/app/lib/dbSingleton.ts";
+import { NextResponse } from "next/server";
+import { verifySession } from "@/app/lib/data-access-layer.ts";
 
-export async function UPDATE(request: Request) {
+
+export async function PUT(request: Request) {
     const session = await verifySession();
 
     if (!session) {
@@ -29,29 +29,33 @@ export async function UPDATE(request: Request) {
         }
 
         const requestBody = await request.json();
+
         const { userIdToEdit, updatedHourlyRate } = requestBody;
 
         if (!userIdToEdit || userIdToEdit.length === 0) {
             return NextResponse.json(
-                { message: "No user IDs provided" },
+                { message: "User ID to edit is required" },
                 { status: 400 },
             );
         }
 
-        if (!updatedHourlyRate) {
+
+        const rate = Number(updatedHourlyRate);
+
+        if (updatedHourlyRate === undefined || updatedHourlyRate === null) {
             return NextResponse.json(
                 { message: "Hourly rate is required" },
                 { status: 400 },
             );
         }
-        if (updatedHourlyRate < 0 ) {
+        if (isNaN(rate) || rate < 0) {
             return NextResponse.json(
-                { message: "Hourly rate must be positve" },
+                { message: "Hourly rate must be a non-negative number" },
                 { status: 400 },
             );
         }
 
-        if (userIdToEdit.includes(authenticatedUser.userId)) {
+        if (userIdToEdit === authenticatedUser.userId) {
             return NextResponse.json(
                 {
                     message:
@@ -71,44 +75,38 @@ export async function UPDATE(request: Request) {
             );
         }
 
-        try {
-            const updatedUser = await dbSingleton.user.update({
-                where: { userId: userIdToEdit },
-                data: {
-                    hourlyRate: updatedHourlyRate,
-                    updatedAt: new Date(),
-                },
-                select: {
-                    userId: true,
-                    name: true,
-                    email: true,
-                    hourlyRate: true,
-                    updatedAt: true,
-                },
-            });
 
-            return NextResponse.json({
-                message:
-                    `Hourly rate updated successfully for user ${updatedUser.userId}`,
-                status: 200,
-                updatedUser: {
-                    userId: updatedUser.userId,
-                    email: updatedUser.email,
-                    hourlyRate: updatedUser.hourlyRate,
-                    updatedAt: updatedUser.updatedAt,
-                },
-            });
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                console.error("Error updating hourly rate:", error.message);
-            } else {
-                console.error("Unexpected error:", error);
-            }
-        }
+        const updatedUser = await dbSingleton.user.update({
+            where: { userId: userIdToEdit },
+            data: {
+                hourlyRate: rate,
+                updatedAt: new Date(),
+            },
+            select: {
+                userId: true,
+                name: true,
+                email: true,
+                hourlyRate: true,
+                updatedAt: true,
+            },
+        });
+
+        return NextResponse.json({
+            message:
+                `Hourly rate updated successfully for user ${updatedUser.userId}`,
+            status: 200,
+            updatedUser: {
+                userId: updatedUser.userId,
+                email: updatedUser.email,
+                hourlyRate: updatedUser.hourlyRate,
+                updatedAt: updatedUser.updatedAt,
+            },
+        });
     } catch (error) {
         console.error("Error during hourly rate update:", error);
+
         return NextResponse.json(
-            { message: "Internal server error" },
+            { message: "Internal server error during update" },
             { status: 500 },
         );
     }
