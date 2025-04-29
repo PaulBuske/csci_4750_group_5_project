@@ -84,9 +84,6 @@ const PayPeriodTable = (
     { currentUser, refreshTrigger }: PayPeriodTableProps,
 ) => {
     const [payPeriodLookup, setPayPeriodLookup] = React.useState<Date>(today);
-    const [displayedTimeEntries, setDisplayedTimeEntries] = React.useState<
-        TimeEntry[]
-    >([]);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     const [timeEntryRows, setTimeEntryRows] = React.useState<TimeEntryRow[]>(
         [],
@@ -151,7 +148,6 @@ const PayPeriodTable = (
                 }
 
                 const entries = timeEntries as TimeEntry[];
-                setDisplayedTimeEntries(entries);
 
                 const newTimeEntryRows = createTimeEntryRows(
                     entries,
@@ -184,7 +180,6 @@ const PayPeriodTable = (
         };
 
         const resetStates = () => {
-            setDisplayedTimeEntries([]);
             setTimeEntryRows([]);
             setPayStubGrossPay(0);
             setPayStubTaxes(0);
