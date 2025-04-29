@@ -4,7 +4,7 @@ import { verifySession } from "@/app/lib/data-access-layer.ts";
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
     const session = await verifySession();
 
     if (!session) {

@@ -281,6 +281,7 @@ const ManagementUserTable = (
                             );
                         } else {
                             setEditHourlyRateButtonErrorMessage(null);
+                            setViewPayPeriodErrorMessage(null);
                         }
                     }}
                 />
@@ -289,7 +290,7 @@ const ManagementUserTable = (
                 component={Paper}
                 display="flex"
                 flexDirection="column"
-                justifyContent="space-around"
+                justifyContent="start"
                 alignItems="center"
                 width="100%"
                 maxWidth="lg"
@@ -317,7 +318,8 @@ const ManagementUserTable = (
                 <Button
                     variant="contained"
                     disabled={selectedUsers === null ||
-                        selectedUsers.length === 0}
+                        selectedUsers.length === 0 ||
+                        selectedUsers.length > 1}
                     onClick={() =>
                         handlePayTableUserChange(
                             selectedUsers ? selectedUsers[0] : currentUserId,
@@ -325,7 +327,7 @@ const ManagementUserTable = (
                 >
                     View User Pay Stubs
                 </Button>
-                {isCurrentUserSelected && (
+                { !!viewPayPeriodErrorMessage && (
                     <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
                         {viewPayPeriodErrorMessage}
                     </Alert>

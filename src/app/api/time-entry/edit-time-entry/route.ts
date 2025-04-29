@@ -40,7 +40,7 @@ export async function POST(request: Request) {
             );
         }
 
-        if (authenticatedUser.userId !== timeEntryToBeEdited?.userId) {
+        if (authenticatedUser.userId !== timeEntryToBeEdited?.userId && authenticatedUser.role !== "MANAGER") {
             return NextResponse.json(
                 {
                     message:

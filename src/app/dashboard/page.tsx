@@ -26,12 +26,15 @@ export default function Dashboard() {
     const [payTableUser, setPayTableUser] = React.useState<ProjectUser | null>(null);
 
     const handlePayTableUserChange = async (newUserId: string) => {
+        console.log("handlePayTableUserChange called with newUserId:", newUserId);
+        console.log("Current user ID:", currentUser?.userId);
         if (currentUser?.userId === newUserId) {
             setPayTableUser(currentUser);
+            return
         } else {
             try {
                 const response = await fetch(`/api/users/get-user-for-pay-period-lookup`, {
-                    method: "GET",
+                    method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -42,6 +45,7 @@ export default function Dashboard() {
                 });
                 const data = await response.json();
                 if (response.ok) {
+                    console.log("User found:", data.foundUser);
                     setPayTableUser(data.foundUser);
                 } else {
                     console.error("Error fetching user:", data.message);
