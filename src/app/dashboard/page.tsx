@@ -13,9 +13,6 @@ import ManagementUserTable from "@/app/ui/management-user-table.tsx";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 
 export default function Dashboard() {
-    const [currentValidSession, setCurrentValidSession] = React.useState<
-        ValidSession | null
-    >(null);
     const [currentUser, setCurrentUser] = React.useState<ProjectUser | null>(
         null,
     );
@@ -132,13 +129,11 @@ export default function Dashboard() {
                 handleShowErrorAlert(
                     "Session invalid or missing user ID. Please log in.",
                 );
-                setCurrentValidSession(null);
                 setCurrentUser(null);
                 setPayTableUser(null);
                 setLoading(false);
                 return;
             }
-            setCurrentValidSession(fetchedSession);
 
             try {
                 const foundUser = await getUser();
