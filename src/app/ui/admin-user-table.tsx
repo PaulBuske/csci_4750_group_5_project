@@ -1,40 +1,22 @@
 "use client";
 
 import * as React from "react";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import type {ProjectUser} from "../types/project-types.ts";
-import {DataGrid, GridColDef, type GridRowId, GridRowSelectionModel,} from "@mui/x-data-grid";
-import {formatDate} from "@/app/helper-functions.ts";
-import {Alert, Button} from "@mui/material";
+import type { ProjectUser } from "../types/project-types.ts";
+import {
+    DataGrid,
+    GridColDef,
+    type GridRowId,
+    GridRowSelectionModel,
+} from "@mui/x-data-grid";
+import { formatDate } from "@/app/helper-functions.ts";
+import { Alert, Button, Fade } from "@mui/material";
 import AddUserModal from "@/app/ui/add-user-modal.tsx";
 import ResetPasswordModal from "@/app/ui/reset-password-modal.tsx";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
-
-const handleDeleteUsers = async (userIds: string[]): Promise<boolean> => {
-    try {
-        const response = await fetch("/api/users/delete-user", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userIds }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to delete users: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log(data.message);
-        return true;
-    } catch (error) {
-        console.error("Error deleting users:", error);
-        return false;
-    }
-};
 
 const EXCLUDED_FIELDS = [
     "password",
@@ -82,36 +64,95 @@ const generateColumns = (user: ProjectUser): GridColDef[] => {
     });
 };
 
-
 type AdminUserTableProps = {
     currentUser: ProjectUser;
-}
+};
 
 const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     const [currentUsers, setCurrentUsers] = useState<ProjectUser[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [errorState, setErrorState] = useState<boolean>(false);
     const [isClient, setIsClient] = useState(false);
     const [paginationModel, setPaginationModel] = useState({
         pageSize: 10,
         page: 0,
     });
     const [addUserModalOpen, setAddUserModalOpen] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
     const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
     const [deleteUserButtonErrorMessage, setDeleteUserButtonErrorMessage] =
         useState("");
-    const [setResetPasswordButtonErrorMessage, setSetResetPasswordButtonErrorMessage] = useState("");
+    const [
+        setResetPasswordButtonErrorMessage,
+        setSetResetPasswordButtonErrorMessage,
+    ] = useState("");
+    const [successAlertVisibility, setSuccessAlertVisibility] = React.useState<
+        boolean
+    >(false);
+    const [successMessage, setSuccessMessage] = React.useState<string | null>(
+        null,
+    );
+    const [errorAlertVisibility, setErrorAlertVisibility] = React.useState<
+        boolean
+    >(false);
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+    const handleShowSuccessAlert = (providedSuccessMessage: string) => {
+        const fiveSeconds = 5000;
+        setSuccessAlertVisibility(true);
+        setSuccessMessage(providedSuccessMessage);
+        setTimeout(() => {
+            setSuccessAlertVisibility(false);
+        }, fiveSeconds);
+    };
+
+    const handleShowErrorAlert = (providedErrorMessage: string) => {
+        const fiveSeconds = 5000;
+        setErrorAlertVisibility(true);
+        setErrorMessage(providedErrorMessage);
+        setTimeout(() => {
+            setErrorAlertVisibility(false);
+        }, fiveSeconds);
+    };
+
+    const handleDeleteUsers = async (userIds: string[]): Promise<boolean> => {
+        setLoading(true);
+        try {
+            const response = await fetch("/api/users/delete-user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ userIds }),
+            });
+
+            if (!response.ok) {
+                handleShowErrorAlert(
+                    `Failed to delete users: ${response.status}`,
+                );
+                throw new Error(`Failed to delete users: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log(data.message);
+            handleShowSuccessAlert(
+                data.message || "Users deleted successfully",
+            );
+            return true;
+        } catch (error) {
+            console.error("Error deleting users:", error);
+            handleShowErrorAlert(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to delete users",
+            );
+            return false;
+        }
+    };
 
     const handleDeleteSelected = async () => {
         if (selectedUsers.length === 0) return;
-
         setLoading(true);
-        setErrorState(false);
-        setErrorMessage("");
-
         try {
             const success = await handleDeleteUsers(selectedUsers);
             if (success) {
@@ -125,14 +166,12 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     setCurrentUsers([]);
                 }
                 setSelectedUsers([]);
-                setDeleteUserButtonErrorMessage("");
+                handleShowSuccessAlert("Users deleted successfully");
             } else {
-                setErrorState(true);
-                setErrorMessage("Failed to delete selected users.");
+                handleShowErrorAlert("Failed to delete selected users.");
             }
         } catch (error) {
-            setErrorState(true);
-            setErrorMessage("An error occurred while deleting users.");
+            handleShowErrorAlert("An error occurred while deleting users.");
             console.error("Error deleting users:", error);
         } finally {
             setLoading(false);
@@ -143,11 +182,12 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
         setIsClient(true);
 
         const fetchUsers = async () => {
-            setErrorState(false);
-            setErrorMessage("");
             try {
                 const response = await fetch("/api/users");
                 if (!response.ok) {
+                    handleShowErrorAlert(
+                        `Failed to fetch users: ${response.status}`,
+                    );
                     throw new Error(
                         `Failed to fetch users: ${response.status}`,
                     );
@@ -157,27 +197,28 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     const usersWithId = data.users.map((user: ProjectUser) => ({
                         ...user,
                     }));
+                    handleShowSuccessAlert("Users fetched successfully");
                     setCurrentUsers(usersWithId);
                     if (columns.length === 0) {
                         setColumns(generateColumns(usersWithId[0]));
                     }
                 } else {
+                    handleShowErrorAlert("No users found.");
                     setCurrentUsers([]);
                     setColumns([]);
                 }
             } catch (error: unknown) {
                 if (error instanceof Error) {
                     console.error("Error fetching users:", error.message);
-                    setErrorMessage(
+                    handleShowErrorAlert(
                         `Error fetching users: ${error.message}. Please try again.`,
                     );
                 } else {
                     console.error("Unexpected error fetching users:", error);
-                    setErrorMessage(
+                    handleShowErrorAlert(
                         "An unexpected error occurred while fetching users. Please try again.",
                     );
                 }
-                setErrorState(true);
                 setCurrentUsers([]);
                 setColumns([]);
             } finally {
@@ -186,7 +227,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
         };
 
         if (loading) {
-            fetchUsers();
+            fetchUsers().then();
         }
     }, [loading, columns.length, selectedUsers]);
 
@@ -195,9 +236,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
     }
 
     if (loading || (columns.length === 0 && currentUsers.length > 0)) {
-        return (
-            <LogoSvgLoadingIcon/>
-        );
+        return <LogoSvgLoadingIcon />;
     }
 
     if (!currentUsers || currentUsers.length === 0) {
@@ -224,8 +263,8 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     <AddUserModal
                         open={addUserModalOpen}
                         onClose={() => setAddUserModalOpen(false)}
-                        setErrorState={setErrorState}
-                        setErrorMessage={setErrorMessage}
+                        handleShowSuccessAlert={handleShowSuccessAlert}
+                        handleShowErrorAlert={handleShowErrorAlert}
                         setLoading={setLoading}
                     />
                 )}
@@ -246,11 +285,6 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             width="100%"
             gap={2}
         >
-            {errorState && (
-                <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
-                    {errorMessage}
-                </Alert>
-            )}
             <Paper
                 sx={{
                     height: "auto",
@@ -260,6 +294,27 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     flexDirection: "column",
                 }}
             >
+                <Fade in={successAlertVisibility} timeout={500}>
+                    <Alert
+                        severity="success"
+                        onClose={() => {
+                            setSuccessAlertVisibility(false);
+                        }}
+                    >
+                        {successMessage}
+                    </Alert>
+                </Fade>
+
+                <Fade in={errorAlertVisibility} timeout={500}>
+                    <Alert
+                        severity="success"
+                        onClose={() => {
+                            setErrorAlertVisibility(false);
+                        }}
+                    >
+                        {errorMessage}
+                    </Alert>
+                </Fade>
                 <DataGrid
                     rows={currentUsers}
                     columns={columns}
@@ -350,8 +405,8 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                 <AddUserModal
                     open={addUserModalOpen}
                     onClose={() => setAddUserModalOpen(false)}
-                    setErrorState={setErrorState}
-                    setErrorMessage={setErrorMessage}
+                    handleShowSuccessAlert={handleShowSuccessAlert}
+                    handleShowErrorAlert={handleShowErrorAlert}
                     setLoading={setLoading}
                 />
             )}
@@ -360,8 +415,8 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
                     open={resetPasswordModalOpen}
                     userIdToReset={selectedUsers[0]}
                     onClose={() => setResetPasswordModalOpen(false)}
-                    setErrorState={setErrorState}
-                    setErrorMessage={setErrorMessage}
+                    handleShowSuccessAlert={handleShowSuccessAlert}
+                    handleShowErrorAlert={handleShowErrorAlert}
                     setLoading={setLoading}
                 />
             )}

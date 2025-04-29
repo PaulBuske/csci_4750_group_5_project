@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import {type JWTPayload, jwtVerify, SignJWT} from "jose";
 import {cookies} from "next/headers";
 import {dbSingleton} from "@/app/lib/dbSingleton.ts";
@@ -26,6 +28,7 @@ export async function decrypt(token: string | undefined) {
     }
 }
 
+//used in production
 export async function createSession(userId: string) {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 

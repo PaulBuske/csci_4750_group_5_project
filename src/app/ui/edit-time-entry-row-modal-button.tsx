@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -7,7 +8,6 @@ import CheckIcon from "@mui/icons-material/Check";
 import Cancel from "@mui/icons-material/Cancel";
 import { TimeEntryRow } from "@/app/types/project-types.ts";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { useEffect } from "react";
 import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -24,12 +24,15 @@ const style = {
     p: 4,
 };
 type EditTimeEntryRowModalButtonProps = {
-    timeEntryRow?: TimeEntryRow;
-    setLoading?: (value: ((prevState: boolean) => boolean) | boolean) => void;
+    timeEntryRow: TimeEntryRow;
+    setLoading: (value: ((prevState: boolean) => boolean) | boolean) => void;
+    handleShowSuccessAlert: (message: string) => void;
+    handleShowErrorAlert: (message: string) => void;
 };
 
 const EditTimeEntryRowModalButton = (
-    { timeEntryRow, setLoading }: EditTimeEntryRowModalButtonProps,
+    { timeEntryRow, setLoading, handleShowSuccessAlert, handleShowErrorAlert }:
+        EditTimeEntryRowModalButtonProps,
 ) => {
     const [open, setOpen] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
@@ -76,10 +79,9 @@ const EditTimeEntryRowModalButton = (
 
             if (response.ok) {
                 console.log("Time entry edited successfully.");
+                handleShowSuccessAlert?.("Time entry edited successfully.");
                 handleClose();
-                if (setLoading) {
-                    setLoading(true);
-                }
+                setLoading(true);
                 setError(null);
             } else {
                 const errorData: Response = await response.json();
@@ -88,10 +90,16 @@ const EditTimeEntryRowModalButton = (
                     response.status,
                     errorData.statusText,
                 );
+                handleShowErrorAlert?.(
+                    "Failed to edit time entry. Please try again.",
+                );
                 setError("Failed to edit time entry. Please try again.");
             }
         } catch (error) {
             console.error("Error calling edit API:", error);
+            handleShowErrorAlert?.(
+                "An error occurred while editing the time entry.",
+            );
             setError("An error occurred while editing the time entry.");
         }
     }

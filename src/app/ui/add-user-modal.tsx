@@ -1,9 +1,11 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import {
     Alert,
     Box,
     Button,
     FormControl,
+    IconButton,
+    InputAdornment,
     InputLabel,
     MenuItem,
     Modal,
@@ -11,7 +13,9 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import {UserRole} from "@prisma/client";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { UserRole } from "@prisma/client";
 
 const style = {
     position: "absolute",
@@ -30,34 +34,42 @@ const style = {
 type AddUserModalProps = {
     open: boolean;
     onClose: () => void;
-    setErrorState: React.Dispatch<React.SetStateAction<boolean>>;
-    setErrorMessage?: (value: ((prevState: string) => string) | string) => void;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    handleShowSuccessAlert: (message: string) => void;
+    handleShowErrorAlert: (message: string) => void;
 };
 
 const AddUserModal = (
-    { open, onClose, setErrorState, setErrorMessage, setLoading }:
+    { open, onClose, setLoading, handleShowSuccessAlert, handleShowErrorAlert }:
         AddUserModalProps,
 ) => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState<UserRole>(UserRole.EMPLOYEE);
+    const [errorState, setErrorState] = useState(false);
     const [modalErrorMessage, setModalErrorMessage] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (
+        event: React.MouseEvent<HTMLButtonElement>,
+    ) => {
+        event.preventDefault();
+    };
 
     const handleSubmit = async () => {
         setErrorState(false);
-        if (setErrorMessage) {
-            setErrorMessage("");
-        }
         setModalErrorMessage("");
 
         if (!name || !email || !password) {
+            setErrorState(true);
             setModalErrorMessage("Please fill out all required fields");
             return;
         }
 
         if (email.includes(" ")) {
+            setErrorState(true);
             setModalErrorMessage("Email cannot contain spaces");
             return;
         }
@@ -65,6 +77,7 @@ const AddUserModal = (
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email)) {
+            setErrorState(true);
             setModalErrorMessage("Please enter a valid email address");
             return;
         }
@@ -82,29 +95,23 @@ const AddUserModal = (
                 const errorData = await response.json().catch(() => ({
                     message: `HTTP error ${response.status}`,
                 }));
-                setErrorState(true);
-                if (setErrorMessage) {
-                    setErrorMessage(
-                        `Failed to add user: ${
-                            errorData.message || response.statusText
-                        }`,
-                    );
-                }
+                handleShowErrorAlert(
+                    `Failed to add user: ${
+                        errorData.message || response.statusText
+                    }`,
+                );
                 return;
             }
 
-            if (setLoading) {
-                setLoading(true);
-            }
+            setLoading(true);
+            handleShowSuccessAlert?.("User added successfully");
             onClose();
         } catch (error) {
             console.error("Error submitting new user:", error);
-            setErrorState(true);
-            if (setErrorMessage) {
-                setErrorMessage(
+                handleShowSuccessAlert(
                     "An unexpected error occurred while adding the user.",
                 );
-            }
+
         }
     };
 
@@ -114,9 +121,7 @@ const AddUserModal = (
         setPassword("");
         setRole(UserRole.EMPLOYEE);
         setErrorState(false);
-        if (setErrorMessage) {
-            setErrorMessage("");
-        }
+        setModalErrorMessage("");
         onClose();
     };
 
@@ -148,12 +153,28 @@ const AddUserModal = (
                 <TextField
                     fullWidth
                     required
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     label="Password"
                     placeholder="Enter user password"
                     margin="normal"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowPassword}
+                                    onMouseDown={handleMouseDownPassword}
+                                    edge="end"
+                                >
+                                    {showPassword
+                                        ? <VisibilityOff />
+                                        : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
                 />
                 <FormControl fullWidth margin="normal">
                     <InputLabel id="role-select-label">Role</InputLabel>
@@ -169,7 +190,7 @@ const AddUserModal = (
                         <MenuItem value={UserRole.ADMIN}>ADMIN</MenuItem>
                     </Select>
                 </FormControl>
-                {modalErrorMessage && (
+                {errorState && (
                     <Alert severity="error" sx={{ width: "100%", mt: 2 }}>
                         {modalErrorMessage}
                     </Alert>
