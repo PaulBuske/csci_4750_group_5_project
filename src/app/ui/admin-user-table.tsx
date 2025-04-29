@@ -93,7 +93,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
         }, fiveSeconds);
     };
 
-    const handleShowErrorAlert = (providedErrorMessage) => {
+    const handleShowErrorAlert = (providedErrorMessage: string) => {
         const fiveSeconds = 5000;
         setErrorAlertVisibility(true);
         setErrorMessage(providedErrorMessage)
@@ -114,8 +114,8 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to delete users: ${response.status}`);
                 handleShowErrorAlert(`Failed to delete users: ${response.status}`);
+                throw new Error(`Failed to delete users: ${response.status}`);
             }
 
             const data = await response.json();
@@ -168,10 +168,10 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
             try {
                 const response = await fetch("/api/users");
                 if (!response.ok) {
+                    handleShowErrorAlert(`Failed to fetch users: ${response.status}`);
                     throw new Error(
                         `Failed to fetch users: ${response.status}`,
                     );
-                    handleShowErrorAlert(`Failed to fetch users: ${response.status}`);
                 }
                 const data = await response.json();
                 if (data.users && data.users.length > 0) {
@@ -208,7 +208,7 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
         };
 
         if (loading) {
-            fetchUsers();
+            fetchUsers().then();
         }
     }, [loading, columns.length, selectedUsers]);
 
@@ -270,13 +270,13 @@ const AdminUserTable = ({ currentUser }: AdminUserTableProps) => {
         >
             <Fade in={successAlertVisibility} timeout={500}>
                 <Alert severity="success" onClose={() => {
-                    successAlertVisibility(false);
+                    setSuccessAlertVisibility(false);
                 }}>
                     {successMessage}
                 </Alert>
             </Fade>
 
-            <Fade in={errorAlertVisibility()} timeout={500}>
+            <Fade in={errorAlertVisibility} timeout={500}>
                 <Alert severity="success" onClose={() => {
                     setErrorAlertVisibility(false);
                 }}>

@@ -1,5 +1,5 @@
-import React, {useState} from "react";
-import {Box, Button, Modal, TextField, Typography} from "@mui/material";
+import React, { useState } from "react";
+import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 
 const style = {
     position: "absolute",
@@ -19,9 +19,9 @@ type ResetPasswordModalProps = {
     open: boolean;
     userIdToReset: string;
     onClose: () => void;
-    handleShowSuccessAlert?: (message: string) => void;
-    handleShowErrorAlert?: (message: string) => void;
-    setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+    handleShowSuccessAlert: (message: string) => void;
+    handleShowErrorAlert: (message: string) => void;
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ResetPasswordModal = ({
@@ -34,18 +34,18 @@ const ResetPasswordModal = ({
 }: ResetPasswordModalProps) => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [errorState, setError] = useState(false);
+    const [passwordErrorState, setPasswordErrorState] = useState(false);
     const [passwordError, setPasswordError] = useState("");
 
     const validatePassword = () => {
         if (password.length < 12) {
-            setErrorState(true)
+            setPasswordErrorState(true);
             setPasswordError("Password must be at least 12 characters long");
             return false;
         }
 
         if (!/[A-Z]/.test(password)) {
-            setErrorState(true)
+            setPasswordErrorState(true);
             setPasswordError(
                 "Password must contain at least one uppercase letter",
             );
@@ -53,7 +53,7 @@ const ResetPasswordModal = ({
         }
 
         if (!/[a-z]/.test(password)) {
-            setErrorState(true)
+            setPasswordErrorState(true);
             setPasswordError(
                 "Password must contain at least one lowercase letter",
             );
@@ -61,13 +61,13 @@ const ResetPasswordModal = ({
         }
 
         if (!/\d/.test(password)) {
-            setErrorState(true)
+            setPasswordErrorState(true);
             setPasswordError("Password must contain at least one number");
             return false;
         }
 
         if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-            setErrorState(true)
+            setPasswordErrorState(true);
             setPasswordError(
                 "Password must contain at least one special character",
             );
@@ -75,11 +75,11 @@ const ResetPasswordModal = ({
         }
 
         if (password !== confirmPassword) {
-            setErrorState(true)
+            setPasswordErrorState(true);
             setPasswordError("Passwords do not match");
             return false;
         }
-        setErrorState(false)
+        setPasswordErrorState(false);
         setPasswordError("");
         return true;
     };
@@ -108,11 +108,12 @@ const ResetPasswordModal = ({
             });
 
             if (!response.ok) {
-                handleShowErrorAlert(`Failed to reset password: ${response.statusText}`);
+                handleShowErrorAlert(
+                    `Failed to reset password: ${response.statusText}`,
+                );
                 throw new Error(`Failed to reset password: ${response.status}`);
             }
-            const {email} = await response.json();
-            handleShowSuccessAlert(`Password reset successfully for ${email}`);
+            handleShowSuccessAlert(`Password reset successfully.`);
             onClose();
         } catch (error) {
             console.error("Error resetting passwords:", error);
@@ -122,10 +123,9 @@ const ResetPasswordModal = ({
                 handleShowErrorAlert("Failed to reset passwords");
             }
         } finally {
-            if (setLoading) {
-                setLoading(false);
-            }
+            setLoading(false);
         }
+    };
 
     return (
         <Modal open={open} onClose={onClose}>
@@ -141,8 +141,8 @@ const ResetPasswordModal = ({
                     margin="normal"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    error={!!passwordError && password !== ""}
-                    helperText={passwordError && password !== ""
+                    error={passwordErrorState}
+                    helperText={passwordErrorState && password !== ""
                         ? passwordError
                         : "Password must be at least 12 characters with uppercase, lowercase, numbers, and symbols"}
                 />
@@ -154,7 +154,7 @@ const ResetPasswordModal = ({
                     margin="normal"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    error={!!passwordError && password === confirmPassword}
+                    error={passwordErrorState && password === confirmPassword}
                 />
                 <Box
                     sx={{

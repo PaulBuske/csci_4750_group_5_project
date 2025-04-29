@@ -20,10 +20,10 @@ const style = {
 };
 
 type DeleteTimeEntryModalProps = {
-    timeEntryRow?: TimeEntryRow;
-    setLoading?: (value: ((prevState: boolean) => boolean) | boolean) => void;
-    handleShowSuccessAlert?: (message: string) => void;
-    handleShowErrorAlert?: (message: string) => void;
+    timeEntryRow: TimeEntryRow;
+    setLoading: (value: ((prevState: boolean) => boolean) | boolean) => void;
+    handleShowSuccessAlert: (message: string) => void;
+    handleShowErrorAlert: (message: string) => void;
 }
 
 const DeleteTimeEntryModal = (

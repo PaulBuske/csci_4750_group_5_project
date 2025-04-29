@@ -59,7 +59,7 @@ This command:
 - Applies the migration to your database
 - Regenerates the Prisma client
 
-#### Applying Migartions in Production
+#### Applying Migrations in Production
 For production environments, use:
 ```bash
   npx prisma migrate deploy
@@ -124,7 +124,7 @@ For production environments, use:
 
 #### MUI (Material-UI)
 - **Role**: React component library
-- **Usage**: Providing pre-styled components like DataGrid, Buttons, and Paper ensure standardized UI accross the application.
+- **Usage**: Providing pre-styled components like DataGrid, Buttons, and Paper ensure standardized UI across the application.
 - **Docs**: [MUI Documentation](https://mui.com/material-ui/getting-started/overview/)
 
 #### Tailwind CSS

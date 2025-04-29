@@ -104,7 +104,7 @@ const PayPeriodTable = (
         }, fiveSeconds);
     };
 
-    const handleShowErrorAlert = (providedErrorMessage) => {
+    const handleShowErrorAlert = (providedErrorMessage: string) => {
         const fiveSeconds = 5000;
         setErrorAlertVisibility(true);
         setErrorMessage(providedErrorMessage)
@@ -178,7 +178,6 @@ const PayPeriodTable = (
                 setPayStubTaxes(taxes);
                 setPayStubNetPay(netPay);
 
-                handleShowSuccessAlert("Data fetched successfully")
                 setErrorMessage(null);
                 setLoading(false);
             } catch (e: unknown) {
@@ -216,13 +215,13 @@ const PayPeriodTable = (
             >
                  <Fade in={successAlertVisibility} timeout={500}>
                      <Alert severity="success" onClose={() => {
-                         successAlertVisibility(false);
+                         setSuccessAlertVisibility(false);
                      }}>
                             {successMessage}
                      </Alert>
                  </Fade>
 
-                 <Fade in={errorAlertVisibility()} timeout={500}>
+                 <Fade in={errorAlertVisibility} timeout={500}>
                      <Alert severity="success" onClose={() => {
                          setErrorAlertVisibility(false);
                      }}>

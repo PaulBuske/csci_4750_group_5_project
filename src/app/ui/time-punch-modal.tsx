@@ -27,10 +27,10 @@ const style = {
 };
 
 type TimePunchModalProps = {
-    currentUser?: ProjectUser | null;
-    onPunchSuccess?: () => void;
-    handleShowSuccessAlert?: (message: string) => void;
-    handleShowErrorAlert?: (message: string) => void;
+    currentUser: ProjectUser | null;
+    onPunchSuccess: () => void;
+    handleShowSuccessAlert: (message: string) => void;
+    handleShowErrorAlert: (message: string) => void;
 };
 
 const TimePunchModal = (
@@ -146,7 +146,7 @@ const TimePunchModal = (
             }
         };
 
-        fetchTimeEntry();
+        fetchTimeEntry().then();
     }, [currentUser, errorMessage]);
     return (
         <div>
