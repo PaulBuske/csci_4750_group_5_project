@@ -116,21 +116,21 @@ export default function LoginForm() {
                         id="password"
                         autoComplete="current-password"
                         InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
-                                        edge="end"
-                                    >
-                                        {showPassword
-                                            ? <VisibilityOff />
-                                            : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="toggle password visibility"
+                                    onClick={handleClickShowPassword}
+                                    onMouseDown={handleMouseDownPassword}
+                                    edge="end"
+                                >
+                                    {showPassword
+                                        ? <VisibilityOff />
+                                        : <Visibility />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
                     />
                     <Box
                         display="flex"

@@ -14,7 +14,7 @@ import {
     GridRowSelectionModel,
 } from "@mui/x-data-grid";
 import { formatDate } from "@/app/helper-functions.ts";
-import { Alert, Button } from "@mui/material";
+import { Alert, Button, Fade } from "@mui/material";
 import LogoSvgLoadingIcon from "@/app/ui/logo-svg-icon/logo-svg-loading-icon.tsx";
 import EditHourlyRateModal from "@/app/ui/edit-hourly-rate-modal.tsx";
 
@@ -77,13 +77,11 @@ const ManagementUserTable = (
     const [currentUsers, setCurrentUsers] = useState<ProjectUser[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [errorState, setErrorState] = useState<boolean>(false);
     const [isClient, setIsClient] = useState(false);
     const [paginationModel, setPaginationModel] = useState({
         pageSize: 10,
         page: 0,
     });
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedUsers, setSelectedUsers] = useState<string[] | null>(null);
     const [
         editHourlyRateButtonErrorMessage,
@@ -95,21 +93,52 @@ const ManagementUserTable = (
     const [viewPayPeriodErrorMessage, setViewPayPeriodErrorMessage] = useState<
         string | null
     >(null);
+    const [successAlertVisibility, setSuccessAlertVisibility] = React.useState<
+        boolean
+    >(false);
+    const [successMessage, setSuccessMessage] = React.useState<string | null>(
+        null,
+    );
+    const [errorAlertVisibility, setErrorAlertVisibility] = React.useState<
+        boolean
+    >(false);
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+    const handleShowSuccessAlert = (providedSuccessMessage: string) => {
+        const fiveSeconds = 5000;
+        setSuccessAlertVisibility(true);
+        setSuccessMessage(providedSuccessMessage);
+        setTimeout(() => {
+            setSuccessAlertVisibility(false);
+        }, fiveSeconds);
+    };
+
+    const handleShowErrorAlert = (providedErrorMessage: string) => {
+        const fiveSeconds = 5000;
+        setErrorAlertVisibility(true);
+        setErrorMessage(providedErrorMessage);
+        setTimeout(() => {
+            setErrorAlertVisibility(false);
+        }, fiveSeconds);
+    };
+
     const currentUserId = currentUser.userId;
 
     const handleEditHourlyRate = async (userId: string, hourlyRate: number) => {
         if (!userId || userId.length === 0) {
-            setErrorMessage("No user ID provided");
+            handleShowErrorAlert("No user ID provided");
             return;
         }
         if (
             hourlyRate === undefined || hourlyRate === null || isNaN(hourlyRate)
         ) {
-            setErrorMessage("Hourly rate is required and must be a number");
+            handleShowErrorAlert(
+                "Hourly rate is required and must be a number",
+            );
             return;
         }
         if (hourlyRate < 0) {
-            setErrorMessage("Hourly rate must be positive");
+            handleShowErrorAlert("Hourly rate must be positive");
             return;
         }
 
@@ -131,21 +160,21 @@ const ManagementUserTable = (
                     `Failed to update hourly rate: ${response.status}`,
                     errorData,
                 );
-                setErrorMessage(
+                handleShowErrorAlert(
                     errorData.message || "Failed to update hourly rate",
                 );
                 throw new Error(
                     errorData.message ||
-                    `HTTP error! status: ${response.status}`,
+                        `HTTP error! status: ${response.status}`,
                 );
             }
 
-            setErrorMessage(null);
+            handleShowSuccessAlert("Hourly rate updated successfully");
             setLoading(true);
         } catch (error) {
             console.error("Error in handleEditHourlyRate:", error);
             if (!errorMessage) {
-                setErrorMessage(
+                handleShowErrorAlert(
                     "An error occurred while updating the hourly rate.",
                 );
             }
@@ -158,7 +187,6 @@ const ManagementUserTable = (
         setIsClient(true);
 
         const fetchUsers = async () => {
-            setErrorState(false);
             try {
                 const response = await fetch("/api/users");
                 if (!response.ok) {
@@ -171,6 +199,7 @@ const ManagementUserTable = (
                     const usersWithId = data.users.map((user: ProjectUser) => ({
                         ...user,
                     }));
+                    handleShowSuccessAlert("Users fetched successfully");
                     setCurrentUsers(usersWithId);
                     setColumns(generateColumns(usersWithId[0]));
                 } else {
@@ -180,13 +209,18 @@ const ManagementUserTable = (
             } catch (error: unknown) {
                 if (error instanceof Error) {
                     console.error("Error fetching users:", error.message);
+                    handleShowErrorAlert(
+                        `Error fetching users: ${error.message}`,
+                    );
                 } else {
                     console.error(
                         "Unexpected errorMessage fetching users:",
                         error,
                     );
+                    handleShowErrorAlert(
+                        "Unexpected errorMessage fetching users",
+                    );
                 }
-                setErrorState(true);
                 setCurrentUsers([]);
                 setColumns([]);
             } finally {
@@ -226,115 +260,135 @@ const ManagementUserTable = (
     }
 
     return (
-        <Box
-            display="flex"
-            flexDirection="row"
-            justifyContent="space-between"
-            width="100%"
-        >
-            {errorState && (
-                <Alert severity="error" sx={{ width: "100%", mb: 2 }}>
-                    {errorMessage}
-                </Alert>
-            )}
-            <Paper
-                sx={{
-                    height: "auto",
-                    width: "min-content",
-                    maxWidth: "lg",
-                    p: 2,
-                    display: "flex",
-                    flexDirection: "column",
+        <Box display="flex" flexDirection="column" width="100%">
+
+            <Fade in={successAlertVisibility} timeout={500}>
+            <Alert
+                severity="success"
+                onClose={() => {
+                    setSuccessAlertVisibility(false);
                 }}
             >
-                <DataGrid
-                    rows={currentUsers}
-                    columns={columns}
-                    getRowId={(row) => row.userId}
-                    paginationModel={paginationModel}
-                    onPaginationModelChange={setPaginationModel}
-                    pageSizeOptions={[5, 10, 20, 50]}
-                    checkboxSelection
-                    disableRowSelectionOnClick
-                    sx={{ border: 0 }}
-                    onRowSelectionModelChange={(
-                        newSelectionModel: GridRowSelectionModel,
-                    ) => {
-                        const selectedRowIdsSet: Set<GridRowId> =
-                            newSelectionModel.ids;
-                        const selectedUserIds = Array.from(selectedRowIdsSet)
-                            .map((id) => String(id));
-                        setSelectedUsers(selectedUserIds);
-
-                        if (
-                            selectedUserIds.includes(currentUserId)
-                        ) {
-                            setEditHourlyRateButtonErrorMessage(
-                                "Cannot edit your own hourly rate.",
-                            );
-                        } else if (selectedUserIds.length > 1) {
-                            setEditHourlyRateButtonErrorMessage(
-                                "Cannot edit multiple users at once.",
-                            );
-                            setViewPayPeriodErrorMessage(
-                                "Cannot view pay periods of multiple users at once.",
-                            );
-                        } else {
-                            setEditHourlyRateButtonErrorMessage(null);
-                            setViewPayPeriodErrorMessage(null);
-                        }
-                    }}
-                />
-            </Paper>
-            <Box
-                component={Paper}
-                display="flex"
-                flexDirection="column"
-                justifyContent="start"
-                alignItems="center"
-                width="100%"
-                maxWidth="lg"
-            >
-                <Typography variant="h6" sx={{ mb: 2 }}>
-                    User Management
-                </Typography>
-                <Button
-                    variant="contained"
-                    sx={{ height: "3rem", mb: 2 }}
-                    disabled={selectedUsers === null ||
-                        selectedUsers.length === 0 ||
-                        isCurrentUserSelected}
-                    onClick={() => {
-                        setEditHourlyRateModelOpen(true);
+                {successMessage}
+            </Alert>
+        </Fade>
+            <Fade in={errorAlertVisibility} timeout={500}>
+                <Alert
+                    severity="success"
+                    onClose={() => {
+                        setErrorAlertVisibility(false);
                     }}
                 >
-                    Edit Hourly Rate
-                </Button>
-                {isCurrentUserSelected && (
-                    <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
-                        {editHourlyRateButtonErrorMessage}
-                    </Alert>
-                )}
-                <Button
-                    variant="contained"
-                    disabled={selectedUsers === null ||
-                        selectedUsers.length === 0 ||
-                        selectedUsers.length > 1}
-                    onClick={() =>
-                        handlePayTableUserChange(
+                    {errorMessage}
+                </Alert>
+            </Fade>
+
+            <Box
+                display="flex"
+                flexDirection="row"
+                justifyContent="space-between"
+                width="100%"
+            >
+
+                <Paper
+                    sx={{
+                        height: "auto",
+                        width: "min-content",
+                        maxWidth: "lg",
+                        p: 2,
+                        display: "flex",
+                        flexDirection: "column",
+                    }}
+                >
+                    <DataGrid
+                        rows={currentUsers}
+                        columns={columns}
+                        getRowId={(row) => row.userId}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[5, 10, 20, 50]}
+                        checkboxSelection
+                        disableRowSelectionOnClick
+                        sx={{ border: 0 }}
+                        onRowSelectionModelChange={(
+                            newSelectionModel: GridRowSelectionModel,
+                        ) => {
+                            const selectedRowIdsSet: Set<GridRowId> =
+                                newSelectionModel.ids;
+                            const selectedUserIds = Array.from(
+                                selectedRowIdsSet,
+                            )
+                                .map((id) => String(id));
+                            setSelectedUsers(selectedUserIds);
+
+                            if (
+                                selectedUserIds.includes(currentUserId)
+                            ) {
+                                setEditHourlyRateButtonErrorMessage(
+                                    "Cannot edit your own hourly rate.",
+                                );
+                            } else if (selectedUserIds.length > 1) {
+                                setEditHourlyRateButtonErrorMessage(
+                                    "Cannot edit multiple users at once.",
+                                );
+                                setViewPayPeriodErrorMessage(
+                                    "Cannot view pay periods of multiple users at once.",
+                                );
+                            } else {
+                                setEditHourlyRateButtonErrorMessage(null);
+                                setViewPayPeriodErrorMessage(null);
+                            }
+                        }}
+                    />
+                </Paper>
+                <Box
+                    component={Paper}
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="start"
+                    alignItems="center"
+                    width="100%"
+                    maxWidth="lg"
+                >
+                    <Typography variant="h6" sx={{ mb: 2 }}>
+                        User Management
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        sx={{ height: "3rem", mb: 2 }}
+                        disabled={selectedUsers === null ||
+                            selectedUsers.length === 0 ||
+                            isCurrentUserSelected}
+                        onClick={() => {
+                            setEditHourlyRateModelOpen(true);
+                        }}
+                    >
+                        Edit Hourly Rate
+                    </Button>
+                    {isCurrentUserSelected && (
+                        <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
+                            {editHourlyRateButtonErrorMessage}
+                        </Alert>
+                    )}
+                    <Button
+                        variant="contained"
+                        disabled={selectedUsers === null ||
+                            selectedUsers.length === 0 ||
+                            selectedUsers.length > 1}
+                        onClick={() => handlePayTableUserChange(
                             selectedUsers ? selectedUsers[0] : currentUserId,
                         )}
-                >
-                    View User Pay Stubs
-                </Button>
-                { !!viewPayPeriodErrorMessage && (
-                    <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
-                        {viewPayPeriodErrorMessage}
-                    </Alert>
-                )}
-            </Box>
-            {editHourlyRateModelOpen && selectedUsers &&
-                selectedUsers.length === 1 && (
+                    >
+                        View User Pay Stubs
+                    </Button>
+                    {!!viewPayPeriodErrorMessage && (
+                        <Alert severity="warning" sx={{ width: "100%", mt: 1 }}>
+                            {viewPayPeriodErrorMessage}
+                        </Alert>
+                    )}
+                </Box>
+                {editHourlyRateModelOpen && selectedUsers &&
+                    selectedUsers.length === 1 && (
                     <EditHourlyRateModal
                         open={editHourlyRateModelOpen}
                         onClose={() => setEditHourlyRateModelOpen(false)}
@@ -342,6 +396,7 @@ const ManagementUserTable = (
                         onEditHourlyRate={handleEditHourlyRate}
                     />
                 )}
+            </Box>
         </Box>
     );
 };
