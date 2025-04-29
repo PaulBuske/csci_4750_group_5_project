@@ -9,8 +9,8 @@ import { TimeEntryRow } from "@/app/types/project-types.ts";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { useEffect } from "react";
 import dayjs from "dayjs";
-import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
-import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const style = {
     position: "absolute",
@@ -23,7 +23,6 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
-
 type EditTimeEntryRowModalButtonProps = {
     timeEntryRow?: TimeEntryRow;
     setLoading?: (value: ((prevState: boolean) => boolean) | boolean) => void;
@@ -53,38 +52,41 @@ const EditTimeEntryRowModalButton = (
     const handleOpen = () => {
         setOpen(true);
     };
+
     const handleClose = () => {
         setOpen(false);
-        setLoading!(true);
+        if (setLoading) {
+            setLoading(true);
+        }
     };
 
     async function editRowData(timeEntryRow: TimeEntryRow) {
-        const apiUrl = `/api/time-entry/delete-time-entry`;
-
         try {
-            const response = await fetch(apiUrl, {
-                method: "UPDATE",
+            const response = await fetch(`/api/time-entry/edit-time-entry`, {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     timeEntryId: timeEntryRow.timeEntryId,
-                    clockInTime: clockInTime?.toISOString(),
-                    clockOutTime: clockOutTime?.toISOString(),
+                    newClockInTime: clockInTime?.toISOString(),
+                    newClockOutTime: clockOutTime?.toISOString(),
                 }),
             });
 
             if (response.ok) {
                 console.log("Time entry edited successfully.");
                 handleClose();
-                setLoading!(true);
+                if (setLoading) {
+                    setLoading(true);
+                }
                 setError(null);
             } else {
-                const errorData = await response.json();
+                const errorData: Response = await response.json();
                 console.error(
                     "Failed to edit time entry:",
                     response.status,
-                    errorData.message,
+                    errorData.statusText,
                 );
                 setError("Failed to edit time entry. Please try again.");
             }
@@ -126,29 +128,30 @@ const EditTimeEntryRowModalButton = (
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <TimePicker
                             label="Clock In Timer"
-                            sx={{margin: "1rem"}}
+                            sx={{ margin: "1rem" }}
                             value={clockInTime || dayjs()}
                             onChange={(newClockInTime) =>
                                 setClockInTime(newClockInTime)}
                         />
                         {timeEntryRow?.clockOutTime && (
-                        <TimePicker
-                            label="Clock Out Timer"
-                            sx={{margin: "1rem"}}
-                            value={clockOutTime || dayjs()}
-                            onChange={(newClockOutTime) => {
-                                if (
-                                    newClockOutTime && clockInTime &&
-                                    newClockOutTime.isBefore(clockInTime)
-                                ) {
-                                    setError(
-                                        "Clock out time cannot be before clock in time.",
-                                    );
-                                    return;
-                                }
-                                setClockOutTime(newClockOutTime);
-                            }}
-                        />
+                            <TimePicker
+                                label="Clock Out Timer"
+                                sx={{ margin: "1rem" }}
+                                value={clockOutTime || dayjs()}
+                                onChange={(newClockOutTime) => {
+                                    if (
+                                        newClockOutTime && clockInTime &&
+                                        newClockOutTime.isBefore(clockInTime)
+                                    ) {
+                                        setError(
+                                            "Clock out time cannot be before clock in time.",
+                                        );
+                                        return;
+                                    }
+                                    setClockOutTime(newClockOutTime);
+                                    setError(null); // Clear error when valid time is selected
+                                }}
+                            />
                         )}
                     </LocalizationProvider>
                     {error && (
@@ -169,6 +172,7 @@ const EditTimeEntryRowModalButton = (
                                 editRowData(timeEntryRow!).then();
                             }}
                             variant="contained"
+                            disabled={!!error || !timeEntryRow}
                         >
                             <CheckIcon />
                         </Button>

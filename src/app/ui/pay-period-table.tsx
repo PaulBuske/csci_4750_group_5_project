@@ -100,33 +100,44 @@ const PayPeriodTable = (
     const [loading, setLoading] = React.useState<boolean>(true);
 
     useEffect(() => {
-        setLoading(true);
-        const fetchTimeEntriesForPayPeriod = async (
-            userId: string,
-            payPeriodLookup: Date,
-        ) => {
+        const fetchAndProcessData = async () => {
+
+            if (!currentUser || !currentUser.userId) {
+                setErrorMessage("User not found.");
+                resetStates();
+                setLoading(false);
+                return;
+            }
+
             try {
                 const payPeriodId = await getOrCreatePayPeriodIfNotExists(
-                    userId,
+                    currentUser.userId,
                     payPeriodLookup,
                 );
+
                 if (!payPeriodId) {
                     setErrorMessage("Pay period not found.");
+                    resetStates();
+                    setLoading(false);
                     return;
                 }
 
                 const payPeriod = await getPayPeriodByPeriodIdAndUserId(
                     payPeriodId,
-                    userId,
+                    currentUser.userId,
                 );
+
                 if (!payPeriod) {
                     setErrorMessage("Pay period not found.");
+                    resetStates();
+                    setLoading(false);
                     return;
                 }
+
                 setCurrentPayPeriod(payPeriod);
 
                 const timeEntries = await getTimeEntriesByPayPeriodIdAndUserId(
-                    userId,
+                    currentUser.userId,
                     payPeriodId,
                 );
 
@@ -134,10 +145,30 @@ const PayPeriodTable = (
                     setErrorMessage(
                         "No time entries found for this pay period.",
                     );
+                    resetStates();
+                    setLoading(false);
                     return;
                 }
-                setDisplayedTimeEntries(timeEntries as TimeEntry[]);
+
+                const entries = timeEntries as TimeEntry[];
+                setDisplayedTimeEntries(entries);
+
+                const newTimeEntryRows = createTimeEntryRows(
+                    entries,
+                    currentUser,
+                );
+                setTimeEntryRows(newTimeEntryRows);
+
+                const grossPay = calculateGrossPay(newTimeEntryRows);
+                const taxes = calculatePayStubTaxes(grossPay, TAX_RATE);
+                const netPay = calculateNetPay(grossPay, taxes);
+
+                setPayStubGrossPay(grossPay);
+                setPayStubTaxes(taxes);
+                setPayStubNetPay(netPay);
+
                 setErrorMessage(null);
+                setLoading(false)
             } catch (e: unknown) {
                 if (e instanceof Error) {
                     setErrorMessage(e.message);
@@ -146,54 +177,22 @@ const PayPeriodTable = (
                     setErrorMessage("Unexpected error fetching data");
                     console.error("Unexpected error:", e);
                 }
+                resetStates();
+            } finally {
+                setLoading(false);
             }
         };
-        if (!currentUser || !currentUser.userId) {
-            setErrorMessage("User not found.");
-            return;
-        } else {
-            fetchTimeEntriesForPayPeriod(currentUser.userId, payPeriodLookup)
-                .then();
-        }
-        setLoading(false);
-    }, [
-        currentUser,
-        payPeriodLookup,
-        refreshTrigger,
-        setErrorMessage,
-        loading,
-    ]);
 
-    useEffect(() => {
-        setLoading(true);
-        if (displayedTimeEntries.length > 0 && currentUser) {
-            const newTimeEntryRows = createTimeEntryRows(
-                displayedTimeEntries,
-                currentUser,
-            );
-            setTimeEntryRows(newTimeEntryRows);
-
-            const grossPay = calculateGrossPay(newTimeEntryRows);
-            const taxes = calculatePayStubTaxes(grossPay, TAX_RATE);
-            const netPay = calculateNetPay(grossPay, taxes);
-
-            setPayStubGrossPay(grossPay);
-            setPayStubTaxes(taxes);
-            setPayStubNetPay(netPay);
-        } else {
+        const resetStates = () => {
+            setDisplayedTimeEntries([]);
             setTimeEntryRows([]);
             setPayStubGrossPay(0);
             setPayStubTaxes(0);
             setPayStubNetPay(0);
-        }
-        setLoading(false);
-    }, [
-        displayedTimeEntries,
-        currentUser,
-        refreshTrigger,
-        setErrorMessage,
-        loading,
-    ]);
+        };
+
+        fetchAndProcessData().then();
+    }, [currentUser, payPeriodLookup, refreshTrigger, loading]);
 
     return (
         <Box>
@@ -254,72 +253,103 @@ const PayPeriodTable = (
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {timeEntryRows.map((timeEntryRow, index) => (
-                                    <TableRow
-                                        key={`${timeEntryRow.workedDate.toISOString()}-${index}`}
-                                    >
-                                        <TableCell>
-                                            {timeEntryRow.workedDate
-                                                ?.toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell align="left">
-                                            {timeEntryRow.clockInTime
-                                                ?.toLocaleTimeString()}
-                                        </TableCell>
-                                        <TableCell align="left">
-                                            {timeEntryRow.clockOutTime
-                                                ?.toLocaleTimeString()}
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            {ccyFormat(
-                                                timeEntryRow.hoursWorked,
-                                            )}
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            {ccyFormat(timeEntryRow.earned)}
-                                        </TableCell>
-                                        <TableCell
-                                        width='15rem'
-                                        >
-                                            <Box
-                                                display="flex"
-                                                alignItems="center"
-                                                flexDirection="row"
+                                {timeEntryRows.length > 0
+                                    ? (
+                                        <>
+                                            {timeEntryRows.map((
+                                                timeEntryRow,
+                                                index,
+                                            ) => (
+                                                <TableRow
+                                                    key={`${timeEntryRow.workedDate.toISOString()}-${index}`}
+                                                >
+                                                    <TableCell>
+                                                        {timeEntryRow.workedDate
+                                                            ?.toLocaleDateString()}
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        {timeEntryRow
+                                                            .clockInTime
+                                                            ?.toLocaleTimeString()}
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        {timeEntryRow
+                                                            .clockOutTime
+                                                            ?.toLocaleTimeString()}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        {ccyFormat(
+                                                            timeEntryRow
+                                                                .hoursWorked,
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        {ccyFormat(
+                                                            timeEntryRow.earned,
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell width="15rem">
+                                                        <Box
+                                                            display="flex"
+                                                            alignItems="center"
+                                                            flexDirection="row"
+                                                        >
+                                                            <EditTimeEntryRowModalButton
+                                                                timeEntryRow={timeEntryRow}
+                                                                setLoading={setLoading}
+                                                            />
+                                                            <DeleteRowModalButton
+                                                                timeEntryRow={timeEntryRow}
+                                                                setLoading={setLoading}
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                            <TableRow>
+                                                <TableCell rowSpan={3} />
+                                                <TableCell colSpan={3}>
+                                                    Subtotal
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {ccyFormat(payStubGrossPay)}
+                                                </TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell colSpan={2}>
+                                                    Tax
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {`${
+                                                        (TAX_RATE * 100)
+                                                            .toFixed(0)
+                                                    } %`}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {ccyFormat(payStubTaxes)}
+                                                </TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell colSpan={3}>
+                                                    Total
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {ccyFormat(payStubNetPay)}
+                                                </TableCell>
+                                            </TableRow>
+                                        </>
+                                    )
+                                    : (
+                                        <TableRow>
+                                            <TableCell
+                                                colSpan={6}
+                                                align="center"
                                             >
-                                                <EditTimeEntryRowModalButton
-                                                    timeEntryRow={timeEntryRow}
-                                                    setLoading={setLoading}
-                                                />
-                                                <DeleteRowModalButton
-                                                    timeEntryRow={timeEntryRow}
-                                                    setLoading={setLoading}
-                                                />
-                                            </Box>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                                <TableRow>
-                                    <TableCell rowSpan={3} />
-                                    <TableCell colSpan={3}>Subtotal</TableCell>
-                                    <TableCell align="right">
-                                        {ccyFormat(payStubGrossPay)}
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell colSpan={2}>Tax</TableCell>
-                                    <TableCell align="right">
-                                        {`${(TAX_RATE * 100).toFixed(0)} %`}
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        {ccyFormat(payStubTaxes)}
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell colSpan={3}>Total</TableCell>
-                                    <TableCell align="right">
-                                        {ccyFormat(payStubNetPay)}
-                                    </TableCell>
-                                </TableRow>
+                                                No time entries found for this
+                                                pay period.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
                             </TableBody>
                         </Table>
                     </TableContainer>

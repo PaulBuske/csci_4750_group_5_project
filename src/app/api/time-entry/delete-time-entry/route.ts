@@ -32,11 +32,21 @@ export const DELETE = async (
             );
         }
 
-        if (authenticatedUser.role !== "MANAGER" || authenticatedUser.userId !== userId ) {
+        if (authenticatedUser.userId !== userId ) {
             return NextResponse.json(
                 { message: "Forbidden - User does not have permission" },
                 { status: 403 },
             );
+        }
+
+
+        if(authenticatedUser.userId !== userId) {
+            if(authenticatedUser.role !== "MANAGER") {
+                return NextResponse.json(
+                    { message: "Unauthorized - User not authorized" },
+                    { status: 403 },
+                );
+            }
         }
 
         const timeEntry = await dbSingleton.timeEntry.findUnique({
