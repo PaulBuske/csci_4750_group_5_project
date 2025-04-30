@@ -1,5 +1,6 @@
 import {dbSingleton} from "@/app/lib/dbSingleton.ts";
 import {NextResponse} from "next/server";
+import bcrypt from "bcrypt";
 
 export async function POST(request: Request) {
     try {
@@ -14,11 +15,15 @@ export async function POST(request: Request) {
 
         const currentDate = new Date();
 
+        console.error("Unhashed password" + password);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        console.error("Hashed password" + hashedPassword);
+
         const addUser = await dbSingleton.user.create({
             data: {
                 name: name,
                 email: email,
-                password: password,
+                password: hashedPassword,
                 role: role,
                 createdAt: currentDate,
             },

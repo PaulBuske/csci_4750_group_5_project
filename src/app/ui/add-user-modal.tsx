@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import {
     Alert,
     Box,
@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { UserRole } from "@prisma/client";
+import {UserRole} from "@prisma/client";
 
 const style = {
     position: "absolute",
