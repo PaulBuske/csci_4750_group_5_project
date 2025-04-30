@@ -131,7 +131,7 @@ const ResetPasswordModal = ({
         <Modal open={open} onClose={onClose}>
             <Box sx={style}>
                 <Typography variant="h6" component="h2">
-                    Reset Password for {userIdToReset.length} User
+                    Reset Password
                 </Typography>
                 <TextField
                     fullWidth
