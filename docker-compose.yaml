@@ -26,5 +26,21 @@ services:
       - postgres
     restart: unless-stopped
 
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: time-management-app
+    ports:
+      - "3000:3000"
+    environment:
+      # Uses 'postgres' (the service name) as the host — not localhost
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/timemanagement?schema=public"
+      JWT_SECRET: "${JWT_SECRET:-local_docker_dev_secret_at_least_32_chars!}"
+      NODE_ENV: production
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
 volumes:
   postgres-data:
