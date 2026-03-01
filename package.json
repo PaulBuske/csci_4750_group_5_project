@@ -35,11 +35,13 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "jose": "^6.0.10",
-    "next": "15.3.0",
-    "next-auth": "^4.24.11",
+    "next": "^15.5.12",
     "prisma": "^6.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "overrides": {
+    "tar": "^7.4.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -55,7 +57,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "dotenv-cli": "^8.0.0",
     "eslint": "^9",
-    "eslint-config-next": "15.3.0",
+    "eslint-config-next": "^16.1.6",
     "jsdom": "^25.0.1",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
