@@ -76,6 +76,22 @@ For production environments, use:
 
 ----
 
+## Seeded User Credentials
+
+The following accounts are created when you run `npm run seed` or `npm run docker:build`:
+
+| Name | Email | Password | Role |
+|---|---|---|---|
+| Admin User | `admin@example.com` | `Admin123!` | ADMIN |
+| Manager User | `manager@example.com` | `Manager123!` | MANAGER |
+| Alice Smith | `alice@example.com` | `Password1!` | EMPLOYEE |
+| Bob Johnson | `bob@example.com` | `Password2@` | EMPLOYEE |
+| Charlie Davis | `charlie@example.com` | `Password3#` | EMPLOYEE |
+
+> **Note:** These credentials are for local development only. Never use these in production.
+
+----
+
 ## Testing — Unit & Component (Vitest)
 
 Unit and component tests use [Vitest](https://vitest.dev) with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
