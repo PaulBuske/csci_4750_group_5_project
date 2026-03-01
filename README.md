@@ -80,6 +80,81 @@ For production environments, use:
 
 ----
 
+## Testing — Unit & Component (Vitest)
+
+Unit and component tests use [Vitest](https://vitest.dev) with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/).
+
+#### Prerequisites
+Start the test database (isolated from your dev DB — runs on port `5433`):
+```bash
+  npm run test:db:up
+```
+Apply migrations and seed the test database:
+```bash
+  npm run test:db:reset
+```
+
+#### Running Tests
+Watch mode (re-runs on file changes):
+```bash
+  npm test
+```
+Single run (CI-friendly):
+```bash
+  npm run test:run
+```
+With coverage report:
+```bash
+  npm run test:coverage
+```
+
+#### File Conventions
+- Colocate test files next to the file under test: `my-component.test.tsx` or `my-util.spec.ts`
+- Tests live in `src/` alongside source code
+
+#### Tear Down
+Stop the test database when you're done:
+```bash
+  npm run test:db:down
+```
+
+----
+
+## Testing — E2E (Playwright)
+
+End-to-end tests use [Playwright](https://playwright.dev) and run against a real browser hitting the Next.js dev server backed by the test database.
+
+#### Prerequisites
+Install Playwright browsers (first time only):
+```bash
+  npx playwright install
+```
+Start and seed the test database (if not already running):
+```bash
+  npm run test:db:up
+  npm run test:db:reset
+```
+
+#### Running Tests
+Headless (CI-friendly):
+```bash
+  npm run test:e2e
+```
+Interactive UI mode:
+```bash
+  npm run test:e2e:ui
+```
+Playwright automatically starts the Next.js dev server against the test database via the `webServer` config in `playwright.config.ts`.
+
+#### Directory Structure
+```
+tests/playwright/
+  specs/     — E2E test files (*.e2e.ts)
+  pages/     — Page Object Models (*.ts)
+```
+
+----
+
 # Technology Stack Overview
 
 ## Core Technologies
@@ -160,3 +235,21 @@ For production environments, use:
 - **Role**: Code formatter
 - **Usage**: Ensuring consistent code style across the project
 - **Docs**: [Prettier Documentation](https://prettier.io/docs/en/index.html)
+
+## Testing
+
+#### Vitest
+- **Role**: Unit and component test runner
+- **Usage**: Fast, Vite-native test runner for unit tests, component tests with React Testing Library, and coverage reporting
+- **Docs**: [Vitest Documentation](https://vitest.dev)
+
+#### React Testing Library
+- **Role**: Component testing utilities
+- **Usage**: Testing React components by querying the DOM the way users interact with it — by role, label, and text
+- **Docs**: [React Testing Library Documentation](https://testing-library.com/docs/react-testing-library/intro/)
+
+#### Playwright
+- **Role**: End-to-end testing framework
+- **Usage**: Browser-based E2E tests that verify complete user journeys against the running application
+- **Docs**: [Playwright Documentation](https://playwright.dev/docs/intro)
+
