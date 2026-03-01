@@ -20,7 +20,12 @@
     "test:db:down": "docker compose -f docker-compose.test.yaml down",
     "test:db:reset": "dotenv -e .env.test -- npx prisma migrate deploy && dotenv -e .env.test -- npx ts-node prisma/seed.ts",
     "test:e2e": "dotenv -e .env.test -- npx playwright test",
-    "test:e2e:ui": "dotenv -e .env.test -- npx playwright test --ui"
+    "test:e2e:ui": "dotenv -e .env.test -- npx playwright test --ui",
+    "docker:up": "docker compose up -d",
+    "docker:build": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f nextjs",
+    "docker:reset": "docker compose down -v && docker compose up --build -d"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

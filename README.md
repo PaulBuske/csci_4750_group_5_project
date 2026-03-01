@@ -6,44 +6,40 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-## Environment Setup
+### Option A — Local Development (recommended for active development)
 
-Create a `.env` file in the project root using the .example.env file as a template. This file will contain your environment variables.
+Create a `.env` file in the project root using `.example.env` as a template:
 
 Install all dependencies:
 ```bash
   npm install
 ```
 
-Install Deno using the docs at: https://docs.deno.com/runtime/getting_started/installation/
-
-Run docker compose
+Start the local Postgres database:
 ```bash
-  docker compose up -d
+  docker compose up -d postgres
 ```
 
 Run the Prisma migration:
 ```bash
   npm run migrate:dev
 ```
+
 Seed the database:
 ```bash
   npm run seed
 ```
-Check the database for seeded data:
-```bash
-  npm run studio
-```
+
 Run the development server:
 ```bash
-  deno task dev
-```
-Validate current build:
-```bash
-  deno task build
+  npm run dev
 ```
 
-### Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Option B — Full Docker Stack (no local Node.js required)
+
+See the [Running the Full Stack in Docker](#running-the-full-stack-in-docker) section below.
 
 ----
 
@@ -155,101 +151,129 @@ tests/playwright/
 
 ----
 
+## Running the Full Stack in Docker
+
+Runs the Next.js app, Postgres, pgAdmin, and a one-shot migration + seed job all together. No local Node.js required.
+
+The startup order is automatic:
+1. **postgres** starts and passes its healthcheck
+2. **migrate** runs `prisma migrate deploy` then seeds the database, then exits
+3. **nextjs** starts only after migrate completes successfully
+
+#### First run (builds image, migrates, seeds, starts app)
+```bash
+  npm run docker:build
+```
+
+#### Open the app
+Visit [http://localhost:3000](http://localhost:3000)
+
+#### Subsequent starts (no rebuild)
+```bash
+  npm run docker:up
+```
+
+#### Watch app logs
+```bash
+  npm run docker:logs
+```
+
+#### Stop all services
+```bash
+  npm run docker:down
+```
+
+#### Full reset (wipes DB volume, rebuilds, re-seeds)
+```bash
+  npm run docker:reset
+```
+
+> **Note:** The `nextjs` and `migrate` containers use `postgres` (the Docker service name) as the database host — not `localhost`. This is already configured in `docker-compose.yaml`. Your local `.env` file continues to use `localhost:5432` for running the app outside Docker.
+
+----
+
 # Technology Stack Overview
 
 ## Core Technologies
 
-#### Deno
-- **Role**: Runtime environment for JavaScript and TypeScript
-- **Usage**: Running your Next.js application with deno task dev
-- **Docs**: [Deno Documentation](https://deno.land/manual/getting_started/installation)
-
 #### Next.js
-- **Role**: React framework for building client or server rendered applications.
-- **Usage**: Provides the structure for your application, including routing and server-side rendering.
-- **Docs**: [Next.js Documentation](https://nextjs.org/docs/getting-started)
+- **Role**: React framework for building full-stack web applications
+- **Usage**: App Router, server components, API routes, middleware for auth
+- **Docs**: [Next.js Documentation](https://nextjs.org/docs)
+
+#### React
+- **Role**: UI component library
+- **Usage**: Building all interactive client-side components
+- **Docs**: [React Documentation](https://react.dev)
+
+#### TypeScript
+- **Role**: Statically typed JavaScript
+- **Usage**: Type safety across the entire codebase — components, API routes, and data access
+- **Docs**: [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 
 ## Database & ORM
 
 #### PostgreSQL
-- **Role**: Relational database management system
-- **Usage**: Storing users, time entries, sessions, and pay periods
+- **Role**: Relational database
+- **Usage**: Storing users, time entries, sessions, and pay periods. Runs locally via Docker, hosted on Neon in production.
 - **Docs**: [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 
-#### Neon
-- **Role**: Serverless PostgreSQL provider
-- **Usage**: Cloud database service (via @neondatabase/serverless)
-- **Docs**: [Neon Documentation](https://neon.tech/docs)
-
 #### Prisma
-- **Role**: ORM (Object-Relational Mapping) for database access
-- **Usage**: Database schema definition, migrations, and type-safe queries
-- **Commands**:**
-  - `npm run migrate:dev`: Run database migrations
+- **Role**: ORM for type-safe database access
+- **Usage**: Schema definition, migrations, and all database queries
+- **Commands**:
+  - `npm run migrate:dev`: Create and apply a migration during development
   - `npm run seed`: Seed the database with initial data
-  - `npm run studio`: Open Prisma Studio for database management
+  - `npm run studio`: Open Prisma Studio for database inspection
 - **Docs**: [Prisma Documentation](https://www.prisma.io/docs)
 
 ## UI Framework
 
-#### React
-- **Role**: JavaScript library for building user interfaces
-- **Usage**: Building the frontend of your application
-- **Docs**: [React Documentation](https://reactjs.org/docs/getting-started.html)
-
 #### MUI (Material-UI)
 - **Role**: React component library
-- **Usage**: Providing pre-styled components like DataGrid, Buttons, and Paper ensure standardized UI across the application.
-- **Docs**: [MUI Documentation](https://mui.com/material-ui/getting-started/overview/)
-
-#### Tailwind CSS
-- **Role**: Utility-first CSS framework
-- **Usage**: Styling your application with utility classes
-- **Docs**: [Tailwind CSS Documentation](https://tailwindcss.com/docs/installation)
+- **Usage**: DataGrid, modals, buttons, alerts, date pickers — all UI components
+- **Docs**: [MUI Documentation](https://mui.com/material-ui/getting-started/)
 
 ## Authentication & Security
 
 #### Jose
-- **Role**: JavaScript implementation of JSON Web Tokens
-- **Usage**: Handling authentication tokens
+- **Role**: JSON Web Token library
+- **Usage**: Signing and verifying session JWTs in `src/app/lib/sessions.ts`
 - **Docs**: [Jose Documentation](https://github.com/panva/jose)
 
 #### bcrypt
 - **Role**: Password hashing library
-- **Usage**: Hashing user passwords for secure storage
+- **Usage**: Hashing user passwords before storage
 - **Docs**: [bcrypt Documentation](https://github.com/kelektiv/node.bcrypt.js)
 
-# Development Tools
+## Development Tools
 
-## TypeScript
-- **Role**: Superset of JavaScript that adds static typing
-- **Usage**: Type safety and better tooling in your Next.js application
-- **Docs**: [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+#### ESLint
+- **Role**: Static analysis and linting
+- **Usage**: Enforcing code quality and catching common errors
+- **Docs**: [ESLint Documentation](https://eslint.org/docs/user-guide/getting-started)
 
-## EsLint
-- **Role**: Linter for identifying and fixing problems in JavaScript and TypeScript code
-- **Usage**: Ensuring code quality and consistency
-- **Docs**: [EsLint Documentation](https://eslint.org/docs/user-guide/getting-started)
-
-## Prettier
-- **Role**: Code formatter
-- **Usage**: Ensuring consistent code style across the project
-- **Docs**: [Prettier Documentation](https://prettier.io/docs/en/index.html)
+#### Docker
+- **Role**: Container runtime
+- **Usage**: Local Postgres + pgAdmin via `docker-compose.yaml`, full app stack via `npm run docker:build`
+- **Docs**: [Docker Documentation](https://docs.docker.com)
 
 ## Testing
 
 #### Vitest
 - **Role**: Unit and component test runner
-- **Usage**: Fast, Vite-native test runner for unit tests, component tests with React Testing Library, and coverage reporting
+- **Usage**: Fast, Vite-native test runner for unit tests and React component tests with coverage reporting
 - **Docs**: [Vitest Documentation](https://vitest.dev)
 
 #### React Testing Library
 - **Role**: Component testing utilities
-- **Usage**: Testing React components by querying the DOM the way users interact with it — by role, label, and text
+- **Usage**: Querying and interacting with React components the way users do — by role, label, and text
 - **Docs**: [React Testing Library Documentation](https://testing-library.com/docs/react-testing-library/intro/)
 
 #### Playwright
 - **Role**: End-to-end testing framework
-- **Usage**: Browser-based E2E tests that verify complete user journeys against the running application
+- **Usage**: Browser-based E2E tests verifying complete user journeys against the running application
 - **Docs**: [Playwright Documentation](https://playwright.dev/docs/intro)
+
+
 
