@@ -12,7 +12,15 @@
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:db:up": "docker compose -f docker-compose.test.yaml up -d",
+    "test:db:down": "docker compose -f docker-compose.test.yaml down",
+    "test:db:reset": "dotenv -e .env.test -- npx prisma migrate deploy && dotenv -e .env.test -- npx ts-node prisma/seed.ts",
+    "test:e2e": "dotenv -e .env.test -- npx playwright test",
+    "test:e2e:ui": "dotenv -e .env.test -- npx playwright test --ui"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -35,15 +43,24 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.50.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.17.30",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.3.4",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
+    "jsdom": "^25.0.1",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.0"
   }
 }
